@@ -6,6 +6,7 @@ package org.tomhume.sopt;
  * of specifying and running tests.
  */
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -23,11 +24,31 @@ public class ReadClassTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testAnalyse() throws IOException {
+	public void testAnalyseLocallyGeneratedClass() throws IOException {
 		
 		/* Load in the class */
 		
-		ClassReader cr = new ClassReader("java.lang.Math");
+		ClassReader cr = new ClassReader("Identity");
+		dumpClass(cr);
+	}
+
+	/**
+	 * Digs out the name, return type and parameters for the supplied method
+	 * Will need to be run after WriteClassTest, to make sure gen/Identity.class exists
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testAnalyseMyGeneratedClass() throws IOException {
+		
+		/* Load in the class */
+
+		FileInputStream fin = new FileInputStream("gen/IdentityTest.class");
+		ClassReader cr = new ClassReader(fin);
+		dumpClass(cr);
+	}
+	
+	private void dumpClass(ClassReader cr) {
 		ClassNode cn = new ClassNode();
 		cr.accept(cn, 0);
 		
@@ -35,11 +56,13 @@ public class ReadClassTest {
 		
 		for (int i=0; i<cn.methods.size(); i++) {
 			MethodNode mn = (MethodNode) cn.methods.get(i);
-			System.err.println(mn.name + " has " + mn.instructions.size() + " opcodes");
+			System.err.println(mn.name + " has " + mn.instructions.size() + " opcodes:");
+			for (int j=0; j<mn.instructions.size(); j++) {
+				System.err.println(" - " + j + ": " + mn.instructions.get(j).getType() + "," + mn.instructions.get(j).getOpcode());
+			}
 			System.err.println("Return=" + Type.getReturnType(mn.desc));
 			System.err.println("Params=" + Arrays.toString(Type.getArgumentTypes(mn.desc)));
 			System.err.println();
 		}
 	}
-
 }
