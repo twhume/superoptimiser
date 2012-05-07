@@ -42,7 +42,7 @@ public class WriteClassTest {
 	public void makeClassFile() throws IOException {
 		ClassGenerator cg = new ClassGenerator();
 		byte[] b = cg.getClassBytes("IdentityTest");
-		FileOutputStream fout = new FileOutputStream("/tmp/IdentityTest.class");
+		FileOutputStream fout = new FileOutputStream("gen/IdentityTest.class");
 		fout.write(b);
 		fout.close();
 	}
