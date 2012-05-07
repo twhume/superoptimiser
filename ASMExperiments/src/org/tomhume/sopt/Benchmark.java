@@ -23,8 +23,8 @@ public class Benchmark {
 		Method genMethod = genClass.getDeclaredMethod("identity", Integer.TYPE);
 
 		// run each 100000 times, once loaded, using reflection in either case
-		long locTime = runTests(locMethod, 10000000);
-		long genTime = runTests(genMethod, 10000000);
+		long locTime = runTests(locMethod, 1000000000);
+		long genTime = runTests(genMethod, 1000000000);
 		
 		System.err.println("loc="+locTime+",gen="+genTime);
 	}
