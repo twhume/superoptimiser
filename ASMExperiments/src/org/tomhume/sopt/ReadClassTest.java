@@ -8,6 +8,7 @@ package org.tomhume.sopt;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -25,11 +26,8 @@ public class ReadClassTest {
 	 */
 	@Test
 	public void testAnalyseLocallyGeneratedClass() throws IOException {
-		
-		/* Load in the class */
-		
-		ClassReader cr = new ClassReader("Identity");
-		dumpClass(cr);
+		ClassDumper cd = new ClassDumper ("Identity");
+		cd.dump();
 	}
 
 	/**
@@ -40,29 +38,41 @@ public class ReadClassTest {
 	 */
 	@Test
 	public void testAnalyseMyGeneratedClass() throws IOException {
-		
-		/* Load in the class */
-
 		FileInputStream fin = new FileInputStream("gen/IdentityTest.class");
-		ClassReader cr = new ClassReader(fin);
-		dumpClass(cr);
+		ClassDumper cd = new ClassDumper (fin);
+		cd.dump();
 	}
-	
-	private void dumpClass(ClassReader cr) {
-		ClassNode cn = new ClassNode();
-		cr.accept(cn, 0);
 		
-		/* Dump out data we're interested in for all methods of this class */
+	class ClassDumper {
+		private ClassReader cr;
+		private ClassNode cn;
 		
-		for (int i=0; i<cn.methods.size(); i++) {
-			MethodNode mn = (MethodNode) cn.methods.get(i);
-			System.err.println(mn.name + " has " + mn.instructions.size() + " opcodes:");
-			for (int j=0; j<mn.instructions.size(); j++) {
-				System.err.println(" - " + j + ": " + mn.instructions.get(j).getType() + "," + mn.instructions.get(j).getOpcode());
+		public ClassDumper(String s) throws IOException {
+			cr = new ClassReader(s);
+			acceptNode();
+		}
+		
+		public ClassDumper(InputStream in) throws IOException {
+			cr = new ClassReader(in);
+			acceptNode();
+		}
+		
+		private void acceptNode() {
+			cn = new ClassNode();
+			cr.accept(cn, 0);
+		}
+
+		public void dump() {
+			for (int i=0; i<cn.methods.size(); i++) {
+				MethodNode mn = (MethodNode) cn.methods.get(i);
+				System.err.println(mn.name + " has " + mn.instructions.size() + " opcodes:");
+				for (int j=0; j<mn.instructions.size(); j++) {
+					System.err.println(" - " + j + ": " + mn.instructions.get(j).getType() + "," + mn.instructions.get(j).getOpcode());
+				}
+				System.err.println("Return=" + Type.getReturnType(mn.desc));
+				System.err.println("Params=" + Arrays.toString(Type.getArgumentTypes(mn.desc)));
+				System.err.println();
 			}
-			System.err.println("Return=" + Type.getReturnType(mn.desc));
-			System.err.println("Params=" + Arrays.toString(Type.getArgumentTypes(mn.desc)));
-			System.err.println();
 		}
 	}
 }
