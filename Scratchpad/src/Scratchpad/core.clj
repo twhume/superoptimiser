@@ -26,24 +26,14 @@
   (every? identity l)
 )
 
-;  (filter no-repeats-and-no-As? (apply cartesian-product (repeat 2 alphabet)))
-; now genericise the above function to
-; 1. take a sequence of tests (start with two)
-; 2. use apply to pass l into each test
-; 3. use reduce (?) to gather together all results
+; 1. define a sorted-by-value test-map
+; 2. add tests to it
+; 3. write a separate no-repeats and no-As functions
+; 4. Put these into a test map
+; 5. write a filter which uses the test map to filter a stream of combinations
+; 6. extend the test map so that it records test failures, and thereby runs failing tests first
+; 7. unit tests for all the above
 
-; Write a function which allows us to apply a list of filter functions;
-; which ranks these filter functions in descending order of number of failures
-; and applies these filter functions in this order
-
-; map of function to number_failures using sorted-map-by
-; function which applies this map
-; adjust function to update this map
-; unit tests
-
-;(defn multi-filter
-;  "Filters against a map of criteria"
-  
 
 ;(float ( / (count (filter no-repeats? (apply cartesian-product (repeat 5 alphabet)))) (count (apply cartesian-product (repeat 5 alphabet)))))
   
