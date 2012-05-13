@@ -1,42 +1,30 @@
 (ns Scratchpad.core)
-(require '[clojure.math.combinatorics])
+(use '[clojure.math.combinatorics])
  
 ; 91
-(def alphabet (map char (concat (range 65 67))))
 
-(defn alpha-seq
- ""
- [a b]
- (if (< (count a) b)
- (let [children (map #(str a %) alphabet)]
- (lazy-cat children (mapcat #(alpha-seq % b) children)))
-))
-; if which > range.length return
-; else  
+
+(def alphabet (map char (concat (range 65 91))))
+(def two-letters (repeat 2 alphabet))
+
+
+(defn no-repeats?
+  "returns true if list contains no sequentially repeated items"
+  [l]
+  (let [tail (first (rest l))] 
+    (if (nil? tail) true 
+    (if (= (first l) tail) false (recur (rest l))))))
+
+; Write a function which allows us to apply a list of filter functions;
+; which ranks these filter functions in descending order of number of failures
+; and applies these filter functions in this order
+
+; map of function to number_failures using sorted-map-by
+; function which applies this map
+; adjust function to update this map
+; unit tests
+
+(float ( / (count (filter no-repeats? (apply cartesian-product (repeat 5 alphabet)))) (count (apply cartesian-product (repeat 5 alphabet)))))
   
-  
-  
-(defn make-tree
-  ""
-  [node l depth]
-   (if (< (count node) depth)
-     (let [children (map #(str node %) alphabet)]
-       (lazy-cat children (mapcat #(make-tree % l depth) children) l)
-       )))
-     
-     
-;  take children of this node
-; add each child to the sequence
-; add each of their childre
-; add children of this node to the sequence
-
-; (NODE, SEQUENCE)
-; add children of NODE to SEQUENCE
-; recur with each child
-
-;
-;""
-;A B C
-;A B C AA AB AC
-
-;A B C AA AB AC BA BB BC CA CB CC AAA AAB AAC ABA ABB ABC ...
+;(count (apply cartesian-product (repeat 3 alphabet)))
+;(map #(apply str %) (apply cartesian-product two-letters))
