@@ -68,45 +68,59 @@
   (is (= 2 (@tm a-test)))
   (is (= 3 (@tm b-test)))
   
-  (is (= a-test (key (first @tm)))))
-
-
-;TODO this should increment the fail count for the first failure
-(defn passes-old?
-  "Returns true if the sequence provided passes all the tests in the test map provided"
-  [tm s]
-  (every? true? ((apply juxt (reverse (keys @tm))) s)))
+  (is (= a-test (key (first @tm))))
+)
 
 (defn passes?
   "Returns true if the sequence provided passes all the tests in the test map provided, updates failure counts as appropriate"
   [tm s]
   ; find the first item in the list of tests which returns false
-  (let [failed-test (some #(if (false? ((key %) s)) (key %) nil) @tm)]
+  (let [failed-test (some #(if (false? (% s)) % nil) (reverse (keys @tm)))]
   ; if we've found a failing test, increment its fail count
     (if (nil? failed-test) true
       (do
         (inc-fail-count tm failed-test)
         false
         ))))
-      
-
-; if it's nil, return true
-; otherwise, update its count and return false
-
 
 ; unit tests for passes? function
 
-(let [t (test-map [no-As? no-Bs?])] 
-  (is (= true (passes? t '[\E \F \G])))
-  (is (= true (passes? t '[])))
+(let [tm (test-map [no-As? no-Bs?])] 
+  (is (= true (passes? tm '[\E \F \G])))
+  (is (= true (passes? tm '[])))
 
-	(is (= false (passes? t '[\A \B \C \D \E])))
-	(is (= false (passes? t '[\A])))
-	(is (= false (passes? t '[\B])))
-	(is (= false (passes? t '[\C \D \A \E])))
-	(is (= false (passes? t '[\C \D \E \B])))
+  ; up to this point, no fail count should have been incremented
+  (is (= 0 (@tm no-As?)))
+  (is (= 0 (@tm no-Bs?)))
+ 
+  ; After this failure, the A test should be incremented and in last position
+	(is (= false (passes? tm '[\A])))
+  (is (= 1 (@tm no-As?)))
+  (is (= 0 (@tm no-Bs?)))
+  (is (= no-As? (key (last @tm))))
+  
+  ; After this failure, the A test should be incremented and in last position
+	(is (= false (passes? tm '[\A \B \C \D \E])))
+  (is (= 2 (@tm no-As?)))
+  (is (= 0 (@tm no-Bs?)))
+  (is (= no-As? (key (last @tm))))
+
+  ; Now we'll fail on B 3 times. This should up counters appropriatly and move B into last position
+ 
+	(is (= false (passes? tm '[\B])))
+	(is (= false (passes? tm '[\C \D \E \B])))
+	(is (= false (passes? tm '[\B])))
+  (is (= 2 (@tm no-As?)))
+  (is (= 3 (@tm no-Bs?)))
+  (is (= no-Bs? (key (last @tm))))
+
+  ; Fail on A two last times, moving it back into last position
+	(is (= false (passes? tm '[\C \D \A \E])))
+	(is (= false (passes? tm '[\C \D \A \E])))
+  (is (= 4 (@tm no-As?)))
+  (is (= 3 (@tm no-Bs?)))
+  (is (= no-As? (key (last @tm))))
 )
-
 
 ; we only want those sample predicates for unit tests, so clear them out of our namespace
 (ns-unmap 'MessingAbout.test-map 'no-As?)
