@@ -20,12 +20,13 @@
 (defn test-map
   "Instantiates a new test-map; pass in a sequence of test functions"
   [flist]
-  (atom {:map (into {} (map #(vector % 0) flist))}))
+  (atom (into {} (map #(vector % 0) flist))))
 
+;TODO this should increment the fail count for the first failure
 (defn passes?
   "Returns true if the sequence provided passes all the tests in the test map provided"
   [tm s]
-  (every? true? ((apply juxt (keys (:map @tm))) s)))
+  (every? true? ((apply juxt (keys @tm)) s)))
 
 
 ; These two trivial functions are used for our unit tests
@@ -56,6 +57,10 @@
 ; Tidy up the namespace after all those tests
 (ns-unmap 'MessingAbout.test-map 'no-As?)
 (ns-unmap 'MessingAbout.test-map 'no-Bs?)
-(ns-unmap 'MessingAbout.test-map 't)
+;(ns-unmap 'MessingAbout.test-map 't)
 
 
+; This is how you  update the value of a single key in that map. Took me ages to work out:
+;(let [key (key (first @t)) ]
+; (swap! t conj {key (+ (@t key) 1)})
+;  )
