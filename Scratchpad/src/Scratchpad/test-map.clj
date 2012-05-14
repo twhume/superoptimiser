@@ -72,10 +72,27 @@
 
 
 ;TODO this should increment the fail count for the first failure
-(defn passes?
+(defn passes-old?
   "Returns true if the sequence provided passes all the tests in the test map provided"
   [tm s]
   (every? true? ((apply juxt (reverse (keys @tm))) s)))
+
+(defn passes?
+  "Returns true if the sequence provided passes all the tests in the test map provided, updates failure counts as appropriate"
+  [tm s]
+  ; find the first item in the list of tests which returns false
+  (let [failed-test (some #(if (false? ((key %) s)) (key %) nil) @tm)]
+  ; if we've found a failing test, increment its fail count
+    (if (nil? failed-test) true
+      (do
+        (inc-fail-count tm failed-test)
+        false
+        ))))
+      
+
+; if it's nil, return true
+; otherwise, update its count and return false
+
 
 ; unit tests for passes? function
 
@@ -87,7 +104,8 @@
 	(is (= false (passes? t '[\A])))
 	(is (= false (passes? t '[\B])))
 	(is (= false (passes? t '[\C \D \A \E])))
-	(is (= false (passes? t '[\C \D \E \B]))))
+	(is (= false (passes? t '[\C \D \E \B])))
+)
 
 
 ; we only want those sample predicates for unit tests, so clear them out of our namespace
