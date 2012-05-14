@@ -27,13 +27,6 @@
   [tm s]
   (every? true? ((apply juxt (keys (:map @tm))) s)))
 
-;(defn all-true?
-;  "returns true if the list of expressions supplied all return true"
-;  [m]
-;  (every? identity (:map @m))
-;)
-
-
 
 ; These two trivial functions are used for our unit tests
 
@@ -50,7 +43,19 @@
 )
 
 (def t (test-map [no-As? no-Bs?]))
-(def input '[\A \B \C \D \E])
-(def input2 '[\E \F \G])
-;(keys (:map @t))
-(passes? t input)
+
+(is (= true (passes? t '[\E \F \G])))
+(is (= true (passes? t '[])))
+
+(is (= false (passes? t '[\A \B \C \D \E])))
+(is (= false (passes? t '[\A])))
+(is (= false (passes? t '[\B])))
+(is (= false (passes? t '[\C \D \A \E])))
+(is (= false (passes? t '[\C \D \E \B])))
+
+; Tidy up the namespace after all those tests
+(ns-unmap 'MessingAbout.test-map 'no-As?)
+(ns-unmap 'MessingAbout.test-map 'no-Bs?)
+(ns-unmap 'MessingAbout.test-map 't)
+
+
