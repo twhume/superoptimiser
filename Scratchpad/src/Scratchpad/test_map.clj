@@ -1,4 +1,4 @@
-(ns MessingAbout.test-map )
+(ns Scratchpad.test_map )
 (use 'clojure.test)
 (use '[clojure.data.priority-map])
 
@@ -123,5 +123,5 @@
 )
 
 ; we only want those sample predicates for unit tests, so clear them out of our namespace
-(ns-unmap 'MessingAbout.test-map 'no-As?)
-(ns-unmap 'MessingAbout.test-map 'no-Bs?)
+(ns-unmap 'Scratchpad.test_map 'no-As?)
+(ns-unmap 'Scratchpad.test_map 'no-Bs?)
