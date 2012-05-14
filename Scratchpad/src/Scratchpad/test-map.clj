@@ -1,5 +1,6 @@
 (ns MessingAbout.test-map )
 (use 'clojure.test)
+(use '[clojure.data.priority-map])
 
 ; Test Maps are a concept I use in a couple of places in the SO. They implement a simple
 ; statistical model: a record is kept of test failures, and tests are run in descending order
@@ -20,7 +21,15 @@
 (defn test-map
   "Instantiates a new test-map; pass in a sequence of test functions"
   [flist]
-  (atom (into {} (map #(vector % 0) flist))))
+  (let [m (priority-map {})]
+    (atom (into m (map #(vector % 0) flist)))))
+
+(defn inc-fail-count
+  "Increments the fail count for function f in test map tm"
+  [tm f]
+  (swap! tm conj {f (+ (@tm f) 1)})
+)
+
 
 ;TODO this should increment the fail count for the first failure
 (defn passes?
@@ -58,6 +67,19 @@
 (ns-unmap 'MessingAbout.test-map 'no-As?)
 (ns-unmap 'MessingAbout.test-map 'no-Bs?)
 ;(ns-unmap 'MessingAbout.test-map 't)
+
+;(println t)
+
+
+(def m (atom (priority-map {})))
+;(into {} {:fred 1})
+;(swap! m (into @m {:fred 1}))
+(swap! m conj [:fred 3])
+(swap! m conj [:ginger 2])
+(swap! m conj [:albert 1])
+
+(@m :albert)
+
 
 
 ; This is how you  update the value of a single key in that map. Took me ages to work out:
