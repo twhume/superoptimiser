@@ -17,7 +17,6 @@
 ; test functions. When a Test Map is first initialised, we build a map from the list of 
 ; functions passed in, and initialise the failure count for each function to 0.
 
-;TODO this map should be a sorted one.
 (defn test-map
   "Instantiates a new test-map; pass in a sequence of test functions"
   [flist]
@@ -27,7 +26,7 @@
 (defn inc-fail-count
   "Increments the fail count for function f in test map tm"
   [tm f]
-  (swap! tm conj {f (+ (@tm f) 1)})
+  (swap! tm conj [f (+ (@tm f) 1)])
 )
 
 
@@ -35,7 +34,7 @@
 (defn passes?
   "Returns true if the sequence provided passes all the tests in the test map provided"
   [tm s]
-  (every? true? ((apply juxt (keys @tm)) s)))
+  (every? true? ((apply juxt (reverse (keys @tm))) s)))
 
 
 ; These two trivial functions are used for our unit tests
@@ -66,23 +65,4 @@
 ; Tidy up the namespace after all those tests
 (ns-unmap 'MessingAbout.test-map 'no-As?)
 (ns-unmap 'MessingAbout.test-map 'no-Bs?)
-;(ns-unmap 'MessingAbout.test-map 't)
-
-;(println t)
-
-
-(def m (atom (priority-map {})))
-;(into {} {:fred 1})
-;(swap! m (into @m {:fred 1}))
-(swap! m conj [:fred 3])
-(swap! m conj [:ginger 2])
-(swap! m conj [:albert 1])
-
-(@m :albert)
-
-
-
-; This is how you  update the value of a single key in that map. Took me ages to work out:
-;(let [key (key (first @t)) ]
-; (swap! t conj {key (+ (@t key) 1)})
-;  )
+(ns-unmap 'MessingAbout.test-map 't)
