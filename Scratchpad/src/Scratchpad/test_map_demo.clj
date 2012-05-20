@@ -25,13 +25,16 @@
 (def tm (test-map [no-As? no-repeats?]))
 
 ; Generate a load of candidates from the alphabet, pass them through the test-map
-(count (filter #(passes? tm %) (apply cartesian-product (repeat 2 alphabet))))
+(def start-time (System/currentTimeMillis))
+;(println (count (filter #(passes? tm %) (apply cartesian-product (repeat 4 alphabet)))))
+(println (count (apply cartesian-product (repeat 4 alphabet))))
+(def end-time (System/currentTimeMillis))
+(- end-time start-time)
 
 ; Dump the test-map and verify that fail counts have grown, and ordering is correct:
-tm
 
 
-;(float ( / (count (filter no-repeats? (apply cartesian-product (repeat 5 alphabet)))) (count (apply cartesian-product (repeat 5 alphabet)))))
+;(float ( / (count (filter no-repeats? (apply cartesian-product (repeat 4 alphabet)))) (count (apply cartesian-product (repeat 5 alphabet)))))
   
 ;(count (apply cartesian-product (repeat 3 alphabet)))
 ;(map #(apply str %) (apply cartesian-product two-letters))

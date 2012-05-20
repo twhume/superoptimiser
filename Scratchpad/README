@@ -9,3 +9,15 @@ N/A
 ## License
 
 Copyright (C) 2012 Tom Hume
+
+
+
+
+Next steps
+- generate an alphabet of allowed bytecodes (have disallowed ones in there, but commented out)
+- bytecode will need: opcode and arg-types
+
+
+:iload_0 {:opcode 172}
+:ireturn {:opcode 21 :args [:us-byte]}
+etc.
