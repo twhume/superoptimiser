@@ -51,20 +51,21 @@
               
               ; branching
               
-              :if_icmpeq  {:opcode 159 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-              :if_icmpne  {:opcode 160 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-              :if_icmplt  {:opcode 161 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-              :if_icmpge  {:opcode 162 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-              :if_icmpgt  {:opcode 163 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-              :if_icmple  {:opcode 164 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-              :ifeq {:opcode 153 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-              :ifne {:opcode 154 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-              :iflt {:opcode 155 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-              :ifge {:opcode 156 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-              :ifgt {:opcode 157 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-              :ifle {:opcode 158 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-              :iinc {:opcode 132 :args [:us-byte, :s-byte]}
-              :iload {:opcode 21 :args [:us-byte] :opstack-needs 0 :opstack-effect 1}
+;              :if_icmpeq  {:opcode 159 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
+;              :if_icmpne  {:opcode 160 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
+;              :if_icmplt  {:opcode 161 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
+;              :if_icmpge  {:opcode 162 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
+;              :if_icmpgt  {:opcode 163 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
+;              :if_icmple  {:opcode 164 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
+;              :ifeq {:opcode 153 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+;              :ifne {:opcode 154 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+;              :iflt {:opcode 155 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+;              :ifge {:opcode 156 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+;              :ifgt {:opcode 157 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+;              :ifle {:opcode 158 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+
+              :iinc {:opcode 132 :args [:local-var, :s-byte]}
+              :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
               :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
               :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
               :iload_2 {:opcode 28 :opstack-needs 0 :opstack-effect 1}
@@ -76,7 +77,7 @@
               :ireturn {:opcode 172 :opstack-needs 1 :opstack-effect 0}
               :ishl {:opcode 120 :opstack-needs 2 :opstack-effect -1}
               :ishr {:opcode 122 :opstack-needs 2 :opstack-effect -1}
-              :istore {:opcode 54 :args [:us-byte] :opstack-needs 1 :opstack-effect -1}
+              :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
               
               ; TOODO ARGH. FORGOT TO TAKE INTO ACCOUNT POPPING OFF STACK UNTIL HERE - RECHECK ABOVE ENTRIES
               
@@ -139,17 +140,41 @@
   [s]
   (count (filter #(some #{%} storage-opcodes) s)) 
 )
+
 (is (= 0 (count-storage-ops [:ixor :iushr])))
 (is (= 1 (count-storage-ops [:ixor :istore])))
 (is (= 2 (count-storage-ops [:ixor :istore :istore])))
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore])))
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore :ixor])))
 
+(defn expand-arg
+  "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
+  [k vars]
+  (cond 
+    (= k :local-var) (range 0 vars)
+    (= k :s-byte) (range -127 128)
+    (= k :us-byte) (range 0 256)
+    (= k :byte) (range 0 256)
+    :else (println "bad argument " k))
+)
+(is (= '(0 1 2 3 4) (expand-arg :local-var 5)))
+(is (= nil) (expand-arg :dummy-keyword 1))
 
 (defn expand-opcodes
   "Take a sequence of opcodes and expand the variables within it, returning all possibilities"
   [s]
   (let [seq-length (count s) max-vars (count-storage-ops s)]
+
+
+    (map #(cons % (:args (opcodes %))) s)   
+    
+    ; go through s
+    ; if the current entry has arguments, expand them and add to a current-entry :xargs 
+    ; create a seq-of-seqs out of the opcodes and :xargs entries
+    ; run this through math.combinatorics to create a number of sequences
   )
 )
   
+(expand-opcodes '[:istore :ixor :if_icmpeq])
+
+(expand-arg :s-byte 5)
