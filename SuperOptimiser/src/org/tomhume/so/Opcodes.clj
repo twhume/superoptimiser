@@ -179,10 +179,6 @@
 ; The below WORKS!
 ;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
 
-;(expand-opcodes '[:istore :ixor :istore :ireturn])
-;(count (map expand-opcodes (opcode-sequence 4)))
-(count (opcode-sequence 4))
-;(map expand-opcodes (opcode-sequence 2))
-
-;(count (mapcat identity (map expand-opcodes (opcode-sequence 1))))
+;(count (opcode-sequence 1))
+(mapcat identity (map expand-opcodes (opcode-sequence 2)))
 
