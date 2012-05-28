@@ -1,6 +1,7 @@
-(ns org.tomhume.so)
+(ns org.tomhume.so.Opcodes)
 (use 'clojure.test)
-(use '[clojure.math.combinatorics])
+(use 'clojure.math.combinatorics)
+(use 'org.tomhume.so.TestMap)
 
 ; Each opcode is a key/map pair, where the key is a Keyword, the name of the opcode
 ; The map contains a number of fields; compulsory ones:
@@ -164,14 +165,24 @@
   [s]
   (let [seq-length (count s) max-vars (count-storage-ops s)]
 
-    (apply cartesian-product
-           (map (partial expand-arg max-vars) (flatten (map #(cons % (:args (opcodes %))) s))))   
+    ; Expand all the arguments in the sequence into sequences of possible values,
+    ; get the Cartesian product of the resulting sequence (i.e. all its possibilities)
+    ; and put that into a hash, keeping the sequence length and maximum number of variables handy
     
-    ; go through s
-    ; if the current entry has arguments, expand them and add to a current-entry :xargs 
-    ; create a seq-of-seqs out of the opcodes and :xargs entries
-    ; run this through math.combinatorics to create a number of sequences
+    (map #(seq [:length seq-length :vars max-vars :code %])
+              (apply cartesian-product
+                (map (partial expand-arg max-vars) 
+                     (flatten (map #(cons % (:args (opcodes %))) s)))))
   )
 )
-  
-(expand-opcodes '[:istore :ixor :istore :ireturn])
+
+; The below WORKS!
+;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
+
+;(expand-opcodes '[:istore :ixor :istore :ireturn])
+;(count (map expand-opcodes (opcode-sequence 4)))
+(count (opcode-sequence 4))
+;(map expand-opcodes (opcode-sequence 2))
+
+;(count (mapcat identity (map expand-opcodes (opcode-sequence 1))))
+

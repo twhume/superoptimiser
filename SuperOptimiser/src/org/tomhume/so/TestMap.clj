@@ -1,4 +1,4 @@
-(ns org.tomhume.so)
+(ns org.tomhume.so.TestMap)
 (use 'clojure.test)
 (use '[clojure.data.priority-map])
 

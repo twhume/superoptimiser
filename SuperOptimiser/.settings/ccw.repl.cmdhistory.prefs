@@ -1,2 +1,2 @@
-cmdhistory=["(use 'Opcodes)"]
+cmdhistory=["(use 'Opcodes)" "(opcode-sequence 2)" "1" "2" "(opcode-sequence 4)" "(mapcat identity (((\:istore 0 \:istore 0) (\:istore 0 \:istore 1) (\:istore 1 \:istore 0) (\:istore 1 \:istore 1)) ((\:ixor \:ireturn))))" "(mapcat identity '(((\:istore 0 \:istore 0) (\:istore 0 \:istore 1) (\:istore 1 \:istore 0) (\:istore 1 \:istore 1)) ((\:ixor \:ireturn))))" "(mapcat identity '((\:istore 0 \:istore 0) (\:istore 0 \:istore 1) (\:istore 1 \:istore 0) (\:istore 1 \:istore 1)) ((\:ixor \:ireturn)))" "(mapcat identity '(((a b) (c d))((e f))))" "(mapcat identity '((a b) (c d))((e f)))" "1"]
 eclipse.preferences.version=1
