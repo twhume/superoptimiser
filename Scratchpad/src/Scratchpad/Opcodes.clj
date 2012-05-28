@@ -149,24 +149,24 @@
 
 (defn expand-arg
   "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
-  [k vars]
+  [vars k]
   (cond 
     (= k :local-var) (range 0 vars)
     (= k :s-byte) (range -127 128)
     (= k :us-byte) (range 0 256)
     (= k :byte) (range 0 256)
-    :else (println "bad argument " k))
+    :else (seq [k]))
 )
-(is (= '(0 1 2 3 4) (expand-arg :local-var 5)))
-(is (= nil) (expand-arg :dummy-keyword 1))
+(is (= '(0 1 2 3 4) (expand-arg 5 :local-var)))
+(is (= nil) (expand-arg 1 :dummy-keyword))
 
 (defn expand-opcodes
   "Take a sequence of opcodes and expand the variables within it, returning all possibilities"
   [s]
   (let [seq-length (count s) max-vars (count-storage-ops s)]
 
-
-    (map #(cons % (:args (opcodes %))) s)   
+    (apply cartesian-product
+           (map (partial expand-arg max-vars) (flatten (map #(cons % (:args (opcodes %))) s))))   
     
     ; go through s
     ; if the current entry has arguments, expand them and add to a current-entry :xargs 
@@ -175,6 +175,4 @@
   )
 )
   
-(expand-opcodes '[:istore :ixor :if_icmpeq])
-
-(expand-arg :s-byte 5)
+(expand-opcodes '[:istore :ixor :istore])
