@@ -89,6 +89,10 @@
               :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}
 })
 
+; A list of opcodes which store into a variable. We count these so that
+; we can derive a ceiling for the possible number of local variables.
+(def storage-opcodes '[:istore :istore_0 :istore_1 :istore_2 :istore_3])
+
 (defn has-ireturn?
   "Does the supplied sequence include an ireturn?"
   [l]
@@ -102,6 +106,10 @@
 (defn uses-operand-stack-ok?
   "Does the supplied sequence read from the operand stack only when there's sufficient entries in it?"
   [l]
+  ; keep reading entries until you hit a jump (at which point all bets are off, return true)
+  ; keep a count of the opstack-effect values so far
+  ; if this is ever less than the current opstack-needs, return false
+  
   true
 )
 
@@ -111,7 +119,7 @@
   true
 )
 
-
+; add a filter to check for really obvious redundancy (e.g. ireturn not final in a sequence w/o jumps)
 
 ; TBD:
 ; are there are least 2 different opcodes in the sequence?
@@ -125,5 +133,23 @@
   [n]
  (filter #(passes? opcode-sequence-filter %)
          (apply cartesian-product (repeat n (keys opcodes)))))
-  
+
+(defn count-storage-ops
+  "Count the number of operations writing to a local variable in the supplied sequence"
+  [s]
+  (count (filter #(some #{%} storage-opcodes) s)) 
+)
+(is (= 0 (count-storage-ops [:ixor :iushr])))
+(is (= 1 (count-storage-ops [:ixor :istore])))
+(is (= 2 (count-storage-ops [:ixor :istore :istore])))
+(is (= 2 (count-storage-ops [:ixor :istore_0 :istore])))
+(is (= 2 (count-storage-ops [:ixor :istore_0 :istore :ixor])))
+
+
+(defn expand-opcodes
+  "Take a sequence of opcodes and expand the variables within it, returning all possibilities"
+  [s]
+  (let [seq-length (count s) max-vars (count-storage-ops s)]
+  )
+)
   
