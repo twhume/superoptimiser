@@ -1,30 +1,30 @@
 (ns org.tomhume.so.Bytecode)
+(use 'clojure.test)
 (import '(org.tomhume.so.Opcodes))
 (import '(java.io FileOutputStream))
 (import '(org.objectweb.asm ClassWriter Opcodes))
-(import '(org.objectweb.asm.tree AbstractInsnNode VarInsnNode InsnNode ClassNode MethodNode InsnList))
+(import '(org.objectweb.asm.tree  AbstractInsnNode VarInsnNode InsnNode IincInsnNode IntInsnNode ClassNode MethodNode InsnList))
 
 ; This package handles the creation of Java class files.
 
 (defn add-opcode
   "Creates a child of an AbstractInsNode and returns it"
-  [op & args]
+  [op & argseq]
+  (let [args (flatten argseq) opcode ((opcodes op) :opcode)]
   (cond
-    (nil? ((opcodes op) :args)) (new InsnNode ((opcodes op) :opcode))
-    (= :istore op) (new VarInsnNode ((opcodes op) :opcode) (first args))
-    (= :iload op) (new VarInsnNode ((opcodes op) :opcode) (first args))
-    :else nil))
+    (nil? ((opcodes op) :args)) (new InsnNode opcode)
+    (= :istore op) (new VarInsnNode opcode (first args))
+    (= :iload op) (new VarInsnNode opcode (first args))
+    (= :iinc op) (new IincInsnNode (first args) (second args)) 
+    (= :bipush op) (new IntInsnNode opcode (first args)) 
+    :else nil)))
 
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
-  [insnlist opcodes]
-  (let [op (first opcodes)]
-    (case op
-      :pop (do (println "pop!") (. insnlist add (add-opcode :pop)) (rest opcodes))
-      :ireturn (do (println "return!") (. insnlist add (add-opcode :ireturn)) (rest opcodes))
-      :istore (do (println "istore!") (. insnlist add (add-opcode :istore (second opcodes)))  (nthrest opcodes 2))
-      :iload (do (println "iload!") (. insnlist add (add-opcode :iload (second opcodes)))  (nthrest opcodes 2))
-      ((println "unknown/in bad place!") (rest opcodes)))))
+  [insnlist ocs]
+  (let [op (first ocs)]
+    (. insnlist add (add-opcode op (rest ocs)))
+    (nthrest ocs (+ 1 (count ((opcodes op) :args))))))
 
 (defn get-instructions
   "Turns the supplied list of opcodes and arguments into an InsnList"
@@ -33,6 +33,9 @@
     (loop [codes a]
       (if (empty? codes) l
         (recur (add-opcode-and-args l codes))))))
+
+(is (= 2 (. (get-instructions '(:iload 0 :ireturn)) size)))
+(is (= 1 (. (get-instructions '(:ireturn)) size)))
 
 (defn get-class-bytes
   "Creates a Java Class from the supplied data, returns an array of bytes representing that class. Input should be a map containing keys
@@ -61,5 +64,5 @@
     (with-open [out (FileOutputStream. fn)]
       (.write out b)))
 
-(write-bytes "/tmp/Identity.class" (get-class-bytes '(:iload 0 :ireturn) "IdentityTest" "identity" "(I)I"))
+;(write-bytes "/tmp/Identity.class" (get-class-bytes '(:iload 0 :ireturn) "IdentityTest" "identity" "(I)I"))
 ;(. (get-instructions '(:pop :istore 1 :ireturn)) size)
