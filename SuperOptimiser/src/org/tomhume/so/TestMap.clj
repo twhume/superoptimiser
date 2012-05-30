@@ -18,14 +18,12 @@
 (defn no-As?
   "Predicate that returns true if the supplied sequence doesn't include A"
   [l]
-  (not (some #(= \A %) l))
-)
+  (not (some #(= \A %) l)))
 
 (defn no-Bs?
   "Predicate that returns true if the supplied sequence doesn't include B"
   [l]
-  (not (some #(= \B %) l))
-)
+  (not (some #(= \B %) l)))
 
 ; As we use Test Maps in a couple of places, each one must keep track of its own list of
 ; test functions. When a Test Map is first initialised, we build a map from the list of 
@@ -40,8 +38,7 @@
 (defn inc-fail-count
   "Increments the fail count for function f in test map tm"
   [tm f]
-  (swap! tm conj [f (+ (@tm f) 1)])
-)
+  (swap! tm conj [f (+ (@tm f) 1)]))
 
 ; unit tests for inc-fail-count
 
@@ -68,8 +65,7 @@
   (is (= 2 (@tm a-test)))
   (is (= 3 (@tm b-test)))
   
-  (is (= a-test (key (first @tm))))
-)
+  (is (= a-test (key (first @tm)))))
 
 (defn passes?
   "Returns true if the sequence provided passes all the tests in the test map provided, updates failure counts as appropriate"
@@ -80,8 +76,7 @@
     (if (nil? failed-test) true
       (do
         (inc-fail-count tm failed-test)
-        false
-        ))))
+        false))))
 
 ; unit tests for passes? function
 
@@ -119,6 +114,5 @@
 	(is (= false (passes? tm '[\C \D \A \E])))
   (is (= 4 (@tm no-As?)))
   (is (= 3 (@tm no-Bs?)))
-  (is (= no-As? (key (last @tm))))
-)
+  (is (= no-As? (key (last @tm)))))
 

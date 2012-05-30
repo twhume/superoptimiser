@@ -87,8 +87,7 @@
               :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
               :isub {:opcode 100 :opstack-needs 2 :opstack-effect -1}
               :iushr {:opcode 124 :opstack-needs 2 :opstack-effect -1}
-              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}
-})
+              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}})
 
 ; A list of opcodes which store into a variable. We count these so that
 ; we can derive a ceiling for the possible number of local variables.
@@ -97,8 +96,7 @@
 (defn has-ireturn?
   "Does the supplied sequence include an ireturn?"
   [l]
-  (not (nil? (some #{:ireturn} l)))
-)
+  (not (nil? (some #{:ireturn} l))))
 
 ; Unit tests
 (is (= false (has-ireturn? [:ixor :iushr])))
@@ -111,14 +109,12 @@
   ; keep a count of the opstack-effect values so far
   ; if this is ever less than the current opstack-needs, return false
   
-  true
-)
+  true)
 
 (defn uses-local-variables-ok?
   "Does the supplied sequence try to read from local variables only after they're written to?"
   [l]
-  true
-)
+  true)
 
 ; add a filter to check for really obvious redundancy (e.g. ireturn not final in a sequence w/o jumps)
 
@@ -138,8 +134,7 @@
 (defn count-storage-ops
   "Count the number of operations writing to a local variable in the supplied sequence"
   [s]
-  (count (filter #(some #{%} storage-opcodes) s)) 
-)
+  (count (filter #(some #{%} storage-opcodes) s)))
 
 (is (= 0 (count-storage-ops [:ixor :iushr])))
 (is (= 1 (count-storage-ops [:ixor :istore])))
@@ -155,8 +150,8 @@
     (= k :s-byte) (range -127 128)
     (= k :us-byte) (range 0 256)
     (= k :byte) (range 0 256)
-    :else (seq [k]))
-)
+    :else (seq [k])))
+
 (is (= '(0 1 2 3 4) (expand-arg 5 :local-var)))
 (is (= nil) (expand-arg 1 :dummy-keyword))
 
@@ -172,9 +167,7 @@
     (map #(seq [:length seq-length :vars max-vars :code %])
               (apply cartesian-product
                 (map (partial expand-arg max-vars) 
-                     (flatten (map #(cons % (:args (opcodes %))) s)))))
-  )
-)
+                     (flatten (map #(cons % (:args (opcodes %))) s)))))))
 
 ; The below WORKS!
 ;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
