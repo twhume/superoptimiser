@@ -1,6 +1,7 @@
 (ns org.tomhume.so.Bytecode)
 (use 'clojure.test)
-(import '(org.tomhume.so.Opcodes))
+(use 'org.tomhume.so.Opcodes)
+(import '(clojure.lang DynamicClassLoader))
 (import '(java.io FileOutputStream))
 (import '(org.objectweb.asm ClassWriter Opcodes))
 (import '(org.objectweb.asm.tree  AbstractInsnNode VarInsnNode InsnNode IincInsnNode IntInsnNode ClassNode MethodNode InsnList))
@@ -64,5 +65,38 @@
     (with-open [out (FileOutputStream. fn)]
       (.write out b)))
 
+(defn load-class
+  "Load a class of the given name from the given bytecode"
+  [name bytecode]
+  (let [^DynamicClassLoader cl (clojure.lang.RT/baseLoader)]
+    (.defineClass cl name bytecode '())))
+
+(defn get-class
+  "Creates and loads a class file with the given name"
+  [code className methodName methodSig]
+  (load-class className (get-class-bytes code className methodName methodSig))
+)
+
+
+
 ;(write-bytes "/tmp/Identity.class" (get-class-bytes '(:iload 0 :ireturn) "IdentityTest" "identity" "(I)I"))
 ;(. (get-instructions '(:pop :istore 1 :ireturn)) size)
+(ns-unmap 'org.tomhume.so.Bytecode 'f1)
+(ns-unmap 'org.tomhume.so.Bytecode 'f2)
+(System/gc)
+(def f1 (get-class '(:iload 0 :ireturn) "IdentityTest-1" "identity" "(I)I"))
+(def f2 (get-class '(:iload 0 :ireturn) "IdentityTest-2" "identity" "(I)I"))
+; (IdentityTest-1/identity 2) to call the method
+
+; These unload those classes
+
+; To run a static method, taken from http://pastebin.com/ESaziY4w
+(defmacro static-call [var method & args]
+     `(-> (.getName ~var)
+          (symbol ~(str method))
+          (list ~@args)
+          eval))
+
+(static-call f1 "identity" -123987129837129873917893)
+
+
