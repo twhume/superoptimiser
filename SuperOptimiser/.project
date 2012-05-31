@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-  <name>Scratchpad</name>
-  <comment>FIXME: write description</comment>
+  <name>SuperOptimiser</name>
+  <comment>Exhaustive searches for optimal JVM bytecode, while u wait</comment>
   <projects/>
   <buildSpec>
     <buildCommand>
