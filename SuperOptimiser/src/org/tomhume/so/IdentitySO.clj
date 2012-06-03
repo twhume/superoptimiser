@@ -6,7 +6,7 @@
 
 ; Basic details of the class: class name, method name, method signature
 
-(def class-name-root "IdentityTest42")
+(def class-name-root "IdentityTest44")
 (def method-name "identity")
 (def method-signature "(I)I")
 
@@ -22,8 +22,13 @@
 (defn one-is-not-zero? [i] (not (= 1 (invoke-method i 0))))
 (defn one-is-not-minus-one? [i] (not (= 1 (invoke-method i -1))))
 
-;(def eq-tests-filter (test-map [one-is-one? zero-is-zero? minus-one-is-minus-one? minint-is-minint? maxint-is-maxint? one-is-not-zero? one-is-not-minus-one?]))
-(def eq-tests-filter (test-map [one-is-one? zero-is-zero?]))
+(def eq-tests-filter (test-map [one-is-one? zero-is-zero? minus-one-is-minus-one? minint-is-minint? maxint-is-maxint? one-is-not-zero? one-is-not-minus-one?]))
+
+(defn num-args
+  "How many arguments does the quoted method signature contain?"
+  [s]
+  (dec (- (.indexOf s ")") (.indexOf s "("))))
+
 
 ; generate all 2-sequence bytecodes
 ; map each one to a class file
@@ -32,7 +37,7 @@
 
 (filter #(try (passes? eq-tests-filter (:class %)) (catch VerifyError e (do println e) false))
         (map #(assoc % :class (get-class (:code %)  (str class-name-root "-" (:seq-num %)) meth-name method-signature))
-             (expanded-numbered-opcode-sequence 2)))
+             (expanded-numbered-opcode-sequence 2 1)))
 
-; add equivalence tests, run for each class 
+
 ; unload all generated classes at the end, to avoid namespace feck-ups

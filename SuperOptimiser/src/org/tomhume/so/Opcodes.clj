@@ -146,7 +146,7 @@
   "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
   [vars k]
   (cond 
-    (= k :local-var) (range 0 (+ 1 vars))
+    (= k :local-var) (range 0 vars)
     (= k :s-byte) (range -127 128)
     (= k :us-byte) (range 0 256)
     (= k :byte) (range 0 256)
@@ -156,9 +156,9 @@
 (is (= nil) (expand-arg 1 :dummy-keyword))
 
 (defn expand-opcodes
-  "Take a sequence of opcodes and expand the variables within it, returning all possibilities"
-  [s]
-  (let [seq-length (count s) max-vars (count-storage-ops s)]
+  "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
+  [m s]
+  (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
 
     ; Expand all the arguments in the sequence into sequences of possible values,
     ; get the Cartesian product of the resulting sequence (i.e. all its possibilities)
@@ -173,8 +173,8 @@
 ;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
 
 (defn expanded-numbered-opcode-sequence
-  "Return a numbered, expanded sequence of all valid opcode permutations of length n"
-  [n]
-  (map-indexed (fn [idx itm] (assoc itm :seq-num idx)) (mapcat identity (map expand-opcodes (opcode-sequence n)))))
+  "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
+  [n m]
+  (map-indexed (fn [idx itm] (assoc itm :seq-num idx)) (mapcat identity (map (partial expand-opcodes m) (opcode-sequence n)))))
   
-(expanded-numbered-opcode-sequence 2)
+(expanded-numbered-opcode-sequence 2 1)
