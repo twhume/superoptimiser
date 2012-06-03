@@ -146,7 +146,7 @@
   "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
   [vars k]
   (cond 
-    (= k :local-var) (range 0 vars)
+    (= k :local-var) (range 0 (+ 1 vars))
     (= k :s-byte) (range -127 128)
     (= k :us-byte) (range 0 256)
     (= k :byte) (range 0 256)
