@@ -164,7 +164,7 @@
     ; get the Cartesian product of the resulting sequence (i.e. all its possibilities)
     ; and put that into a hash, keeping the sequence length and maximum number of variables handy
     
-    (map #(seq [:length seq-length :vars max-vars :code %])
+    (map #(seq [:length seq-length :vars max-vars :code %  ])
               (apply cartesian-product
                 (map (partial expand-arg max-vars) 
                      (flatten (map #(cons % (:args (opcodes %))) s)))))))

@@ -10,5 +10,5 @@
 ; load the class file
 ; pass it through the equivalence test map
 
-(time (dorun (map #(get-class-bytes (:code %)  "IdentityTest-1" "identity" "(I)I")
-     (mapcat identity (map expand-opcodes (opcode-sequence 3)))))) ; generate all 2-sequence bytecodes
+(count (map #(get-class (:code %)  "IdentityTest-1" "identity" "(I)I")
+     (mapcat identity (map expand-opcodes (opcode-sequence 2))))) ; generate all 2-sequence bytecodes

@@ -11,7 +11,8 @@
 (defn add-opcode
   "Creates a child of an AbstractInsNode and returns it"
   [op & argseq]
-  (let [args (flatten argseq) opcode ((opcodes op) :opcode)]
+  (let [args (flatten argseq)
+        opcode ((opcodes op) :opcode)]
   (cond
     (nil? ((opcodes op) :args)) (new InsnNode opcode)
     (= :istore op) (new VarInsnNode opcode (first args))
@@ -74,18 +75,26 @@
 (defn get-class
   "Creates and loads a class file with the given name"
   [code className methodName methodSig]
-  (load-class className (get-class-bytes code className methodName methodSig))
+  (try
+    (println code)
+    (load-class className (get-class-bytes code className methodName methodSig))
+    (catch ClassFormatError cfe nil))
 )
+
 
 
 
 ;(write-bytes "/tmp/Identity.class" (get-class-bytes '(:iload 0 :ireturn) "IdentityTest" "identity" "(I)I"))
 ;(. (get-instructions '(:pop :istore 1 :ireturn)) size)
-(ns-unmap 'org.tomhume.so.Bytecode 'f1)
-(ns-unmap 'org.tomhume.so.Bytecode 'f2)
-(System/gc)
-(def f1 (get-class '(:iload 0 :ireturn) "IdentityTest-1" "identity" "(I)I"))
-(def f2 (get-class '(:iload 0 :ireturn) "IdentityTest-2" "identity" "(I)I"))
+;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
+;(ns-unmap 'org.tomhume.so.Bytecode 'f2)
+;(System/gc)
+;(def f1 (get-class '(:iload 0 :ireturn) "IdentityTest-1" "identity" "(I)I"))
+;(def f2 (get-class '(:iload 0 :ireturn) "IdentityTest-2" "identity" "(I)I"))
+;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
+;(ns-unmap 'org.tomhume.so.Bytecode 'f2)
+;(System/gc)
+
 ; (IdentityTest-1/identity 2) to call the method
 
 ; These unload those classes
@@ -96,7 +105,5 @@
           (symbol ~(str method))
           (list ~@args)
           eval))
-
-(static-call f1 "identity" -123987129837129873917893)
 
 
