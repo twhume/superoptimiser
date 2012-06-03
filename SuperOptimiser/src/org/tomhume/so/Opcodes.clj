@@ -128,7 +128,7 @@
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
   [n]
- (filter #(passes? opcode-sequence-filter %)
+  (filter #(passes? opcode-sequence-filter %)
          (apply cartesian-product (repeat n (keys opcodes)))))
 
 (defn count-storage-ops
@@ -172,6 +172,9 @@
 ; The below WORKS!
 ;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
 
-;(count (opcode-sequence 1))
-(first (mapcat identity (map expand-opcodes (opcode-sequence 2))))
-
+(defn expanded-numbered-opcode-sequence
+  "Return a numbered, expanded sequence of all valid opcode permutations of length n"
+  [n]
+  (map-indexed (fn [idx itm] (assoc itm :seq-num idx)) (mapcat identity (map expand-opcodes (opcode-sequence n)))))
+  
+(expanded-numbered-opcode-sequence 2)
