@@ -95,11 +95,3 @@
 
 ; These unload those classes
 
-; To run a static method, taken from http://pastebin.com/ESaziY4w
-(defmacro static-call [var method & args]
-     `(-> (.getName ~var)
-          (symbol ~(str method))
-          (list ~@args)
-          eval))
-
-
