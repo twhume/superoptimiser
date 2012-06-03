@@ -1,13 +1,10 @@
 package org.tomhume.sopt;
 
 import static org.junit.Assert.*;
-
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.Opcodes;
