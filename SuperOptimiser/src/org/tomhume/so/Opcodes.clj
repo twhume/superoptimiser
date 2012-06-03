@@ -164,7 +164,7 @@
     ; get the Cartesian product of the resulting sequence (i.e. all its possibilities)
     ; and put that into a hash, keeping the sequence length and maximum number of variables handy
     
-    (map #(seq [:length seq-length :vars max-vars :code %  ])
+    (map #(hash-map :length seq-length :vars max-vars :code % )
               (apply cartesian-product
                 (map (partial expand-arg max-vars) 
                      (flatten (map #(cons % (:args (opcodes %))) s)))))))
@@ -173,5 +173,5 @@
 ;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
 
 ;(count (opcode-sequence 1))
-(mapcat identity (map expand-opcodes (opcode-sequence 2)))
+(first (mapcat identity (map expand-opcodes (opcode-sequence 2))))
 

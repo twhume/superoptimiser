@@ -76,13 +76,9 @@
   "Creates and loads a class file with the given name"
   [code className methodName methodSig]
   (try
-    (println code)
     (load-class className (get-class-bytes code className methodName methodSig))
     (catch ClassFormatError cfe nil))
 )
-
-
-
 
 ;(write-bytes "/tmp/Identity.class" (get-class-bytes '(:iload 0 :ireturn) "IdentityTest" "identity" "(I)I"))
 ;(. (get-instructions '(:pop :istore 1 :ireturn)) size)
