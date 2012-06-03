@@ -77,21 +77,7 @@
   [code className methodName methodSig]
   (try
     (load-class className (get-class-bytes code className methodName methodSig))
-    (catch ClassFormatError cfe nil))
-)
+    (catch ClassFormatError cfe nil)))
 
-;(write-bytes "/tmp/Identity.class" (get-class-bytes '(:iload 0 :ireturn) "IdentityTest" "identity" "(I)I"))
-;(. (get-instructions '(:pop :istore 1 :ireturn)) size)
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f2)
-;(System/gc)
-;(def f1 (get-class '(:iload 0 :ireturn) "IdentityTest-1" "identity" "(I)I"))
-;(def f2 (get-class '(:iload 0 :ireturn) "IdentityTest-2" "identity" "(I)I"))
-;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
-;(ns-unmap 'org.tomhume.so.Bytecode 'f2)
-;(System/gc)
-
-; (IdentityTest-1/identity 2) to call the method
-
-; These unload those classes
-

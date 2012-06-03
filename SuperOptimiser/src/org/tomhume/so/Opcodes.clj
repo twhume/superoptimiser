@@ -169,12 +169,9 @@
                 (map (partial expand-arg max-vars) 
                      (flatten (map #(cons % (:args (opcodes %))) s)))))))
 
-; The below WORKS!
-;(mapcat identity (map expand-opcodes '((:istore :istore)(:ixor :ireturn))))
-
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
   [n m]
-  (map-indexed (fn [idx itm] (assoc itm :seq-num idx)) (mapcat identity (map (partial expand-opcodes m) (opcode-sequence n)))))
-  
-(expanded-numbered-opcode-sequence 2 1)
+  (map-indexed (fn [idx itm] (assoc itm :seq-num idx))
+               (mapcat identity
+                       (map (partial expand-opcodes m) (opcode-sequence n)))))

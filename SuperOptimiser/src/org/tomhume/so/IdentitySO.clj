@@ -22,4 +22,4 @@
 
 
 
-(superoptimise 2 class-name-root method-name method-signature eq-tests-filter)
+(time (superoptimise 2 class-name-root method-name method-signature eq-tests-filter))
