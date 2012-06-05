@@ -7,7 +7,7 @@
 
 ; Main driver functions for the SuperOptimiser. Kept here so they don't pollute your individual SO stuff
 
-(defn invoke-method [class method arg] (Reflector/invokeStaticMethod class method (into-array [arg])))
+(defn invoke-method [class method & arg] (Reflector/invokeStaticMethod class method (into-array arg)))
 
 (defn num-method-args
   "How many arguments does the quoted Java method signature contain?"
@@ -24,8 +24,9 @@
   [tm class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
-    (try (passes? tm (:class class)) (catch VerifyError e (do println e) false))))
+    (try (passes? tm (:class class)) (catch VerifyError e false) (catch IllegalArgumentException e2 false))))
 
+; stick a "(do (println e)" before the false to get a log of errors - we should try and prevent these
 
 (defn superoptimise
   "Main driver function for the SuperOptimiser"
