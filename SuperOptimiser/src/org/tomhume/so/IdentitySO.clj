@@ -2,6 +2,8 @@
 (use 'org.tomhume.so.TestMap)
 (use 'org.tomhume.so.Main)
 
+; Superoptimises the Identity function
+
 ; Basic details of the class: class name, method name, method signature
 
 (def class-name-root "IdentityTest")
@@ -22,4 +24,6 @@
 
 
 
-(time (dorun (superoptimise 3 class-name-root method-name method-signature eq-tests-filter)))
+(time 
+  (doall
+        (superoptimise 2 class-name-root method-name method-signature eq-tests-filter)))
