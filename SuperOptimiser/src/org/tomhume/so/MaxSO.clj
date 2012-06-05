@@ -9,7 +9,7 @@
 
 ; Basic details of the class: class name, method name, method signature
 
-(def class-name-root "MaxTest")
+(def class-name "MaxTest")
 (def method-name "max")
 (def method-signature "(II)I")
 
@@ -35,4 +35,4 @@
 
 (time 
   (doall
-        (superoptimise 3 class-name-root method-name method-signature eq-tests-filter)))
+        (superoptimise 3 class-name method-name method-signature eq-tests-filter)))
