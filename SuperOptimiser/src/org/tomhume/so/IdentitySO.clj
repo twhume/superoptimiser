@@ -6,7 +6,7 @@
 
 ; Basic details of the class: class name, method name, method signature
 
-(def class-name-root "IdentityTest")
+(def class-name "IdentityTest")
 (def method-name "identity")
 (def method-signature "(I)I")
 
@@ -26,4 +26,4 @@
 
 (time 
   (doall
-        (superoptimise 2 class-name-root method-name method-signature eq-tests-filter)))
+        (superoptimise 2 class-name method-name method-signature eq-tests-filter)))
