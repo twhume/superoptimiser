@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-  <name>SuperOptimiser</name>
-  <comment>Exhaustive searches for optimal JVM bytecode, while u wait</comment>
-  <projects/>
-  <buildSpec>
-    <buildCommand>
-      <name>ccw.builder</name>
-      <arguments/>
-    </buildCommand>
-    <buildCommand>
-      <name>org.eclipse.jdt.core.javabuilder</name>
-      <arguments/>
-    </buildCommand>
-  </buildSpec>
-  <natures>
-    <nature>ccw.nature</nature>
-    <nature>org.eclipse.jdt.core.javanature</nature>
-  </natures>
+	<name>SuperOptimiser</name>
+	<comment>Exhaustive searches for optimal JVM bytecode, while u wait</comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>ccw.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>ccw.nature</nature>
+	</natures>
 </projectDescription>

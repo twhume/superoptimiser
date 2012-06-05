@@ -69,7 +69,8 @@
 (defn load-class
   "Load a class of the given name from the given bytecode"
   [name bytecode]
-  (let [^DynamicClassLoader cl (clojure.lang.RT/baseLoader)]
+;  (let [^DynamicClassLoader cl (clojure.lang.RT/baseLoader)]
+  (let [^DynamicClassLoader cl (new clojure.lang.DynamicClassLoader)]
     (.defineClass cl name bytecode '())))
 
 (defn get-class

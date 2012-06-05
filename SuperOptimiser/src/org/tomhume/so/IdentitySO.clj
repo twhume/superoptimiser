@@ -22,4 +22,4 @@
 
 
 
-(time (superoptimise 2 class-name-root method-name method-signature eq-tests-filter))
+(time (dorun (superoptimise 3 class-name-root method-name method-signature eq-tests-filter)))
