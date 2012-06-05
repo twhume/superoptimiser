@@ -23,7 +23,7 @@
   "check if a class passes its equivalence tests"
   [tm class]
   (let [num (:seq-num class)]
-    (do (if (= 0 (mod num 1000)) (println num)))
+    (do (if (= 0 (mod num 25000)) (println num)))
     (try (passes? tm (:class class)) (catch VerifyError e (do println e) false))))
 
 
@@ -31,5 +31,5 @@
   "Main driver function for the SuperOptimiser"
   [seq-len c-root m-name m-sig tm]
   (filter (partial check-passes tm)
-        (map #(assoc % :class (get-class (:code %)  (str c-root "-" (:seq-num %)) m-name m-sig))
+        (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
