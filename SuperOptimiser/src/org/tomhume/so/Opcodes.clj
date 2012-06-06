@@ -252,9 +252,10 @@
     ; and put that into a hash, keeping the sequence length and maximum number of variables handy
     
     (map #(hash-map :length seq-length :vars max-vars :code % )
+         (filter #(passes? expanded-opcode-sequence-filter %)
               (apply cartesian-product
                 (map (partial expand-arg max-vars) 
-                     (flatten (map #(cons % (:args (opcodes %))) s)))))))
+                     (flatten (map #(cons % (:args (opcodes %))) s))))))))
 
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
