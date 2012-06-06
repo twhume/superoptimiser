@@ -25,7 +25,7 @@
               :dup2 {:opcode 92 :opstack-needs 1 :opstack-effect 1}
               :dup2_x1 {:opcode 93 :opstack-needs 2 :opstack-effect 1}
               :dup2_x2 {:opcode 94 :opstack-needs 2 :opstack-effect 1}
-              :nop {:opcode 0}
+              :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
               :pop {:opcode 87 :opstack-needs 1 :opstack-effect -1}
               :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -2}
               :swap {:opcode 95 :opstack-needs 2 :opstack-effect 0}
@@ -64,7 +64,7 @@
 ;              :ifgt {:opcode 157 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
 ;              :ifle {:opcode 158 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
 
-              :iinc {:opcode 132 :args [:local-var, :s-byte]}
+              :iinc {:opcode 132 :args [:local-var, :s-byte] :opstack-needs 0 :opstack-effect 0}
               :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
               :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
               :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
@@ -108,8 +108,21 @@
   ; keep reading entries until you hit a jump (at which point all bets are off, return true)
   ; keep a count of the opstack-effect values so far
   ; if this is ever less than the current opstack-needs, return false
-  
-  true)
+  (loop [stack-size 0 op-head l ]
+    (let [cur-op (first op-head) next (rest op-head)]
+      (cond
+        (> (:opstack-needs (cur-op opcodes)) stack-size) false
+        (empty? next) true
+        :else (recur (+ stack-size (:opstack-effect (cur-op opcodes))) next)))))
+
+(is (= false (uses-operand-stack-ok? [:ixor])))
+(is (= false (uses-operand-stack-ok? [:ixor :ixor])))
+(is (= false (uses-operand-stack-ok? [:ireturn])))
+(is (= true (uses-operand-stack-ok? [:iload_0 :ireturn])))
+(is (= true (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor])))
+(is (= true (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ireturn])))
+(is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ixor])))
+(is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :iinc :ixor :ixor])))
 
 (defn uses-local-variables-ok?
   "Does the supplied sequence try to read from local variables only after they're written to?"
