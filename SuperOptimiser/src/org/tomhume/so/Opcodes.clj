@@ -168,9 +168,9 @@
 
 (defn uses-vars-ok?
   "Does the supplied sequence try to read from local variables only after they're written to, and not overwrite values in variables?"
-  [l]
-  (let []
-    (loop [head l last-op {}]
+  [nv l]
+  (let [initial-hash (into {} (map #(assoc {} (identity %) :write) (range 0 nv)))]
+    (loop [head l last-op initial-hash]
       (let [op (first head) vm-update (update-varmap head)]
 	      (cond
 	        (empty? head) true
@@ -197,20 +197,19 @@
 	        :else (if (= nil vm-update) (recur (nthrest head (+ 1 (count (:args (op opcodes))))) last-op)
                  (recur (nthrest head (+ 1 (count (:args (op opcodes))))) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
 
-(is (= true (uses-vars-ok? [:ixor])))
-(is (= false (uses-vars-ok? [:iload_0])))
-(is (= true (uses-vars-ok? [:istore_0 :iload_0])))
-(is (= true (uses-vars-ok? [:istore 0 :iload_0])))
-(is (= false (uses-vars-ok? [:istore 1 :iload_0])))
-(is (= false (uses-vars-ok? [:istore_0 :istore_0])))
-(is (= true (uses-vars-ok? [:istore_0 :istore_1])))
-(is (= true (uses-vars-ok? [:istore_0 :iload 0 :istore_0])))
-(is (= true (uses-vars-ok? [:istore_0 :iload 0 :istore_0 :iload 0 :iload_0])))
-(is (= false (uses-vars-ok? [:istore_0 :iload_1 :istore_0])))
+(is (= true (uses-vars-ok? 0 [:ixor])))
+(is (= false (uses-vars-ok? 0 [:iload_0])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0])))
+(is (= true (uses-vars-ok? 0 [:istore 0 :iload_0])))
+(is (= false (uses-vars-ok? 0 [:istore 1 :iload_0])))
+(is (= false (uses-vars-ok? 0 [:istore_0 :istore_0])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :istore_1])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :iload 0 :istore_0])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :iload 0 :istore_0 :iload 0 :iload_0])))
+(is (= false (uses-vars-ok? 0 [:istore_0 :iload_1 :istore_0])))
 
-
-(def expanded-opcode-sequence-filter (test-map [uses-vars-ok?]))
-
+(is (= true (uses-vars-ok? 1 [:iload_0])))
+(is (= false (uses-vars-ok? 1 [:iload_0 :iload_1])))
 
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
@@ -245,7 +244,8 @@
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
   [m s]
-  (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
+  (let [seq-length (count s) max-vars (+ m (count-storage-ops s))
+        expanded-opcode-sequence-filter (test-map [(partial uses-vars-ok? m)])]
 
     ; Expand all the arguments in the sequence into sequences of possible values,
     ; get the Cartesian product of the resulting sequence (i.e. all its possibilities)

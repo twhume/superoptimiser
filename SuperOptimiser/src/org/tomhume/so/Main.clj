@@ -34,3 +34,30 @@
   (filter (partial check-passes tm)
         (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
+
+(defn superoptimise-pmap
+  "Main driver function for the SuperOptimiser - using pmap"
+  [seq-len c-root m-name m-sig tm]
+  (filter (partial check-passes tm)
+        (pmap #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
+             (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
+
+; ---- Parallelised implementation below ----
+
+(defn make-classes
+  "Takes a sequence s, maps all its entries into classes"
+  [c-root m-name m-sig tm s]
+ (filter (partial check-passes tm) (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig)) s))
+)
+
+(defn superoptimise-partitioned
+  "Main driver function for the SuperOptimiser - with partitioned pmap and filtering"
+  [seq-len c-root m-name m-sig tm partition-size]
+  (apply concat
+         (pmap #(make-classes c-root m-name m-sig tm %)
+               (partition-all partition-size
+                              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))))
+
+
+
+;(apply concat (pmap #(identity %) (partition-all 10 (range 0 1000))))
