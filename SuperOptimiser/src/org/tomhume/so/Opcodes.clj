@@ -102,6 +102,16 @@
 (is (= false (has-ireturn? [:ixor :iushr])))
 (is (= true (has-ireturn? [:ixor :ireturn ])))
 
+(defn finishes-ireturn?
+  "Does the supplied sequence finish with an ireturn?"
+  [l]
+  (= :ireturn (last l)))
+
+; Unit tests
+(is (= false (has-ireturn? [:ixor :iushr])))
+(is (= true (has-ireturn? [:ixor :ireturn ])))
+
+
 (defn uses-operand-stack-ok?
   "Does the supplied sequence read from the operand stack only when there's sufficient entries in it?"
   [l]
@@ -124,10 +134,6 @@
 (is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ixor])))
 (is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :iinc :ixor :ixor])))
 
-(defn uses-local-variables-ok?
-  "Does the supplied sequence try to read from local variables only after they're written to?"
-  [l]
-  true)
 
 ; add a filter to check for really obvious redundancy (e.g. ireturn not final in a sequence w/o jumps)
 
@@ -136,7 +142,75 @@
 ; are there no reads from the operand stack before it has been written to?
 ; are there no reads from a local variable before it has been written to?
 
-(def opcode-sequence-filter (test-map [has-ireturn? uses-operand-stack-ok? uses-local-variables-ok?]))
+(def opcode-sequence-filter (test-map [finishes-ireturn? uses-operand-stack-ok?]))
+
+(defn update-varmap
+  "Takes a sequence starting with an opcode and followed by arguments, returns nil or an updated key/value pair for a hash"
+  [s]
+  (let [op (first s)]
+	  (cond
+	    (= op :iload_0) '(0 :read)
+	    (= op :iload_1) '(1 :read)
+	    (= op :iload_2) '(2 :read)
+	    (= op :iload_3) '(3 :read)
+      (= op :iload) (seq [(nth s 1) :read])
+	    (= op :istore_0) '(0 :write)
+	    (= op :istore_1) '(1 :write)
+	    (= op :istore_2) '(2 :write)
+	    (= op :istore_3) '(3 :write)
+      (= op :istore) (seq [(nth s 1) :write])
+      :else nil)))
+
+(is (= '(0 :write) (update-varmap '[:istore_0])))
+(is (= '(3 :read) (update-varmap '[:iload_3])))
+(is (= '(7 :write) (update-varmap '[:istore 7])))
+(is (= '(12 :read) (update-varmap '[:iload 12])))
+
+(defn uses-vars-ok?
+  "Does the supplied sequence try to read from local variables only after they're written to, and not overwrite values in variables?"
+  [l]
+  (let []
+    (loop [head l last-op {}]
+      (let [op (first head) vm-update (update-varmap head)]
+	      (cond
+	        (empty? head) true
+         
+         ; If we're reading from a variable which has never been written, fail the sequence
+         
+	        (and (= op :iload_0) (= nil (get last-op 0))) false 
+	        (and (= op :iload_1) (= nil (get last-op 1))) false
+	        (and (= op :iload_2) (= nil (get last-op 2))) false
+	        (and (= op :iload_3) (= nil (get last-op 3))) false
+          (and (= op :iload) (= nil (get last-op (nth head 1)))) false
+          
+         ; handle :iload
+         
+         ; If we're writing from a variable which we last wrote to (i.e. overwriting data), fail the sequence
+	        (and (= op :istore_0) (= :write (get last-op 0))) false
+	        (and (= op :istore_1) (= :write (get last-op 1))) false
+	        (and (= op :istore_2) (= :write (get last-op 2))) false
+	        (and (= op :istore_3) (= :write (get last-op 3))) false
+          (and (= op :istore) (= :write (get last-op (nth head 1)))) false
+         
+         ; otherwise record the read-write state; skip the appropriate number of instructions; carry on
+          
+	        :else (if (= nil vm-update) (recur (nthrest head (+ 1 (count (:args (op opcodes))))) last-op)
+                 (recur (nthrest head (+ 1 (count (:args (op opcodes))))) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
+
+(is (= true (uses-vars-ok? [:ixor])))
+(is (= false (uses-vars-ok? [:iload_0])))
+(is (= true (uses-vars-ok? [:istore_0 :iload_0])))
+(is (= true (uses-vars-ok? [:istore 0 :iload_0])))
+(is (= false (uses-vars-ok? [:istore 1 :iload_0])))
+(is (= false (uses-vars-ok? [:istore_0 :istore_0])))
+(is (= true (uses-vars-ok? [:istore_0 :istore_1])))
+(is (= true (uses-vars-ok? [:istore_0 :iload 0 :istore_0])))
+(is (= true (uses-vars-ok? [:istore_0 :iload 0 :istore_0 :iload 0 :iload_0])))
+(is (= false (uses-vars-ok? [:istore_0 :iload_1 :istore_0])))
+
+
+(def expanded-opcode-sequence-filter (test-map [uses-vars-ok?]))
+
 
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
