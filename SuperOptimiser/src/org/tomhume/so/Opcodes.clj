@@ -27,7 +27,7 @@
               :dup2_x2 {:opcode 94 :opstack-needs 2 :opstack-effect 1}
               :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
               :pop {:opcode 87 :opstack-needs 1 :opstack-effect -1}
-              :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -2}
+              :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -1}
               :swap {:opcode 95 :opstack-needs 2 :opstack-effect 0}
 
               ; integers
