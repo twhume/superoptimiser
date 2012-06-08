@@ -24,7 +24,7 @@
   [tm class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
-    (try (passes? tm (:class class)) (catch VerifyError e false) (catch IllegalArgumentException e2 false) (catch ArithmeticException e3 false))))
+    (try (passes? tm (:class class)) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))))
 
 ; stick a "(do (println e)" before the false to get a log of errors - we should try and prevent these
 
