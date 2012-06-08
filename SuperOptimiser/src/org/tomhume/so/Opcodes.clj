@@ -25,7 +25,9 @@
               :dup2 {:opcode 92 :opstack-needs 1 :opstack-effect 1}
               :dup2_x1 {:opcode 93 :opstack-needs 2 :opstack-effect 1}
               :dup2_x2 {:opcode 94 :opstack-needs 2 :opstack-effect 1}
-              :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
+              
+              
+;             :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
               :pop {:opcode 87 :opstack-needs 1 :opstack-effect -1}
               :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -1}
               :swap {:opcode 95 :opstack-needs 2 :opstack-effect 0}
@@ -66,10 +68,13 @@
 
               :iinc {:opcode 132 :args [:local-var, :s-byte] :opstack-needs 0 :opstack-effect 0}
               :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
-              :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
-              :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
-              :iload_2 {:opcode 28 :opstack-needs 0 :opstack-effect 1}
-              :iload_3 {:opcode 29 :opstack-needs 0 :opstack-effect 1}
+              
+              ; Commented out as these are just shortcuts for iload
+              
+;              :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
+;              :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
+;              :iload_2 {:opcode 28 :opstack-needs 0 :opstack-effect 1}
+;              :iload_3 {:opcode 29 :opstack-needs 0 :opstack-effect 1}
               :imul {:opcode 104 :opstack-needs 2 :opstack-effect -1}
               :ineg {:opcode 116 :opstack-needs 1 :opstack-effect 0}
               :ior {:opcode 128 :opstack-needs 2 :opstack-effect -1}
@@ -80,11 +85,13 @@
               :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
               
               ; TOODO ARGH. FORGOT TO TAKE INTO ACCOUNT POPPING OFF STACK UNTIL HERE - RECHECK ABOVE ENTRIES
+ 
+              ; Commented out as these are just shortcuts for istore
               
-              :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
-              :istore_1 {:opcode 60 :opstack-needs 1 :opstack-effect -1}
-              :istore_2 {:opcode 61 :opstack-needs 1 :opstack-effect -1}
-              :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
+;              :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
+;              :istore_1 {:opcode 60 :opstack-needs 1 :opstack-effect -1}
+;              :istore_2 {:opcode 61 :opstack-needs 1 :opstack-effect -1}
+;              :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
               :isub {:opcode 100 :opstack-needs 2 :opstack-effect -1}
               :iushr {:opcode 124 :opstack-needs 2 :opstack-effect -1}
               :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}})
@@ -128,11 +135,11 @@
 (is (= false (uses-operand-stack-ok? [:ixor])))
 (is (= false (uses-operand-stack-ok? [:ixor :ixor])))
 (is (= false (uses-operand-stack-ok? [:ireturn])))
-(is (= true (uses-operand-stack-ok? [:iload_0 :ireturn])))
-(is (= true (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor])))
-(is (= true (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ireturn])))
-(is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ixor])))
-(is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :iinc :ixor :ixor])))
+(is (= true (uses-operand-stack-ok? [:iload :ireturn])))
+(is (= true (uses-operand-stack-ok? [:iload :iload :ixor])))
+(is (= true (uses-operand-stack-ok? [:iload :iload :ixor :ireturn])))
+(is (= false (uses-operand-stack-ok? [:iload :iload :ixor :ixor])))
+(is (= false (uses-operand-stack-ok? [:iload :iload :iinc :ixor :ixor])))
 
 
 ; add a filter to check for really obvious redundancy (e.g. ireturn not final in a sequence w/o jumps)
