@@ -35,4 +35,4 @@
 
 (time 
   (doall
-        (superoptimise 3 class-name method-name method-signature eq-tests-filter)))
+        (superoptimise 4 class-name method-name method-signature eq-tests-filter)))
