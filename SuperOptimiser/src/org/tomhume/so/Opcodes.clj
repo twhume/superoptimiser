@@ -123,6 +123,8 @@
                         [:swap :swap]       ; Two swaps leave things as they were
                         [:pop :pop]         ; Could be replaced by :pop2
                         [:ineg :ineg]       ; Two negations get us back where we started
+                        [:iconst_0 :idiv]   ; Divide by zero, never fun
+                        [:iconst_0 :irem]   ; Divide by zero, never fun
                         ))
 
 (defn contains-no-redundant-pairs?
