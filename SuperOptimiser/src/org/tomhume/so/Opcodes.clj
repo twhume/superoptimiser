@@ -18,13 +18,13 @@
               
               :dup {:opcode 89 :opstack-needs 1 :opstack-effect 1}
               
-              ; TODO: I'm not sure that the opstack-needs value of 2 is right here. Needs a test
+              ; Because we are only dealing with integer arithmetic (category 1 computational types), we 
+              ; can predict the effect of these operations on the opstack
               :dup_x1 {:opcode 90 :opstack-needs 2 :opstack-effect 1}
-              ; TODO: this one might have an opstack-needs of 3 in some situations... look into it
-              :dup_x2 {:opcode 91 :opstack-needs 2 :opstack-effect 1}
-              :dup2 {:opcode 92 :opstack-needs 1 :opstack-effect 1}
-              :dup2_x1 {:opcode 93 :opstack-needs 2 :opstack-effect 1}
-              :dup2_x2 {:opcode 94 :opstack-needs 2 :opstack-effect 1}
+              :dup_x2 {:opcode 91 :opstack-needs 3 :opstack-effect 1}
+              :dup2 {:opcode 92 :opstack-needs 2 :opstack-effect 2}
+              :dup2_x1 {:opcode 93 :opstack-needs 3 :opstack-effect 2}
+              :dup2_x2 {:opcode 94 :opstack-needs 4 :opstack-effect 2}
               
               
 ;             :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
