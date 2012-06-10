@@ -32,14 +32,15 @@
               :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -1}
               :swap {:opcode 95 :opstack-needs 2 :opstack-effect 0}
 
-              ; integers
+              ; integer transformation - commented out as we aren't using other types of variables
               
-              :i2b {:opcode 145 :opstack-needs 1 :opstack-effect 0}
-              :i2c {:opcode 146 :opstack-needs 1 :opstack-effect 0}
-              :i2d {:opcode 135 :opstack-needs 1 :opstack-effect 0}
-              :i2f {:opcode 134 :opstack-needs 1 :opstack-effect 0}
-              :i2l {:opcode 133 :opstack-needs 1 :opstack-effect 0}
-              :i2s {:opcode 147 :opstack-needs 1 :opstack-effect 0}
+;              :i2b {:opcode 145 :opstack-needs 1 :opstack-effect 0}
+;              :i2c {:opcode 146 :opstack-needs 1 :opstack-effect 0}
+;              :i2d {:opcode 135 :opstack-needs 1 :opstack-effect 0}
+;              :i2f {:opcode 134 :opstack-needs 1 :opstack-effect 0}
+;              :i2l {:opcode 133 :opstack-needs 1 :opstack-effect 0}
+;              :i2s {:opcode 147 :opstack-needs 1 :opstack-effect 0}
+
               :iadd {:opcode 96  :opstack-needs 2 :opstack-effect -1}
               :iand {:opcode 126 :opstack-needs 2 :opstack-effect -1}
               :iconst_m1 {:opcode 2 :opstack-needs 0 :opstack-effect 1}
@@ -118,6 +119,29 @@
 (is (= false (has-ireturn? [:ixor :iushr])))
 (is (= true (has-ireturn? [:ixor :ireturn ])))
 
+(def redundant-pairs '(
+                        [:swap :swap]       ; Two swaps leave things as they were
+                        [:pop :pop]         ; Could be replaced by :pop2
+                        ))
+
+(defn contains-no-redundant-pairs?
+  "Does the supplied sequence contain any sequences of operations which are redundant?"
+  [l]
+  (loop [pairs redundant-pairs]
+    (if (empty? pairs) true
+      (do
+        (let [cur-pair (first pairs) idx-first (.indexOf l (first cur-pair)) idx-next (inc idx-first)]
+        (if
+          (and
+            (> idx-first -1)
+            (< idx-first (dec (count l)))
+            (= (second cur-pair) (nth l idx-next))) false
+          (recur (rest pairs))))))))
+
+(is (= false (contains-no-redundant-pairs? '[:ixor :swap :swap])))
+(is (= false (contains-no-redundant-pairs? '[:swap :swap])))
+(is (= false (contains-no-redundant-pairs? '[:swap :swap :ixor])))
+(is (= true (contains-no-redundant-pairs? '[:ixor :swap :ixor :swap])))
 
 (defn uses-operand-stack-ok?
   "Does the supplied sequence read from the operand stack only when there's sufficient entries in it?"
