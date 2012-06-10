@@ -122,6 +122,7 @@
 (def redundant-pairs '(
                         [:swap :swap]       ; Two swaps leave things as they were
                         [:pop :pop]         ; Could be replaced by :pop2
+                        [:ineg :ineg]       ; Two negations get us back where we started
                         ))
 
 (defn contains-no-redundant-pairs?
