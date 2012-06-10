@@ -29,7 +29,7 @@
               
 ;             :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
               :pop {:opcode 87 :opstack-needs 1 :opstack-effect -1}
-              :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -1}
+              :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -2}
               :swap {:opcode 95 :opstack-needs 2 :opstack-effect 0}
 
               ; integer transformation - commented out as we aren't using other types of variables
