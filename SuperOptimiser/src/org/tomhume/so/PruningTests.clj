@@ -10,7 +10,7 @@
 (defn is-fertile?
   "Filter predicate testing the fertility of the supplied sequence"
   [s]
-  (uses-operand-stack-ok? s))
+  (and (uses-operand-stack-ok? s) (contains-no-redundant-pairs? s)))
 
 (defn is-valid?
   "Filter predicate testing the validity of the supplied sequence"
