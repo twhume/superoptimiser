@@ -101,14 +101,14 @@
 ; we can derive a ceiling for the possible number of local variables.
 (def storage-opcodes '[:istore :istore_0 :istore_1 :istore_2 :istore_3])
 
-(defn has-ireturn?
-  "Does the supplied sequence include an ireturn?"
+(defn no-ireturn?
+  "Does the supplied sequence not include an ireturn?"
   [l]
-  (not (nil? (some #{:ireturn} l))))
+  (nil? (some #{:ireturn} l)))
 
 ; Unit tests
-(is (= false (has-ireturn? [:ixor :iushr])))
-(is (= true (has-ireturn? [:ixor :ireturn ])))
+(is (= true (no-ireturn? [:ixor :iushr])))
+(is (= false (no-ireturn? [:ixor :ireturn ])))
 
 (defn finishes-ireturn?
   "Does the supplied sequence finish with an ireturn?"
@@ -116,8 +116,9 @@
   (= :ireturn (last l)))
 
 ; Unit tests
-(is (= false (has-ireturn? [:ixor :iushr])))
-(is (= true (has-ireturn? [:ixor :ireturn ])))
+(is (= false (finishes-ireturn? [:ixor :iushr])))
+(is (= false (finishes-ireturn? [:ireturn :iushr])))
+(is (= true (finishes-ireturn? [:ixor :ireturn ])))
 
 (def redundant-pairs '(
                         [:swap :swap]       ; Two swaps leave things as they were
@@ -162,11 +163,11 @@
 (is (= false (uses-operand-stack-ok? [:ixor])))
 (is (= false (uses-operand-stack-ok? [:ixor :ixor])))
 (is (= false (uses-operand-stack-ok? [:ireturn])))
-(is (= true (uses-operand-stack-ok? [:iload :ireturn])))
-(is (= true (uses-operand-stack-ok? [:iload :iload :ixor])))
-(is (= true (uses-operand-stack-ok? [:iload :iload :ixor :ireturn])))
-(is (= false (uses-operand-stack-ok? [:iload :iload :ixor :ixor])))
-(is (= false (uses-operand-stack-ok? [:iload :iload :iinc :ixor :ixor])))
+(is (= true (uses-operand-stack-ok? [:iload_0 :ireturn])))
+(is (= true (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor])))
+(is (= true (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ireturn])))
+(is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ixor])))
+(is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :iinc :ixor :ixor])))
 
 
 ; add a filter to check for really obvious redundancy (e.g. ireturn not final in a sequence w/o jumps)
@@ -234,22 +235,33 @@
 (is (= true (uses-vars-ok? 0 [:ixor])))
 (is (= false (uses-vars-ok? 0 [:iload_0])))
 (is (= true (uses-vars-ok? 0 [:istore_0 :iload_0])))
-(is (= true (uses-vars-ok? 0 [:istore 0 :iload_0])))
-(is (= false (uses-vars-ok? 0 [:istore 1 :iload_0])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0])))
+(is (= false (uses-vars-ok? 0 [:istore_1 :iload_0])))
 (is (= false (uses-vars-ok? 0 [:istore_0 :istore_0])))
 (is (= true (uses-vars-ok? 0 [:istore_0 :istore_1])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :iload 0 :istore_0])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :iload 0 :istore_0 :iload 0 :iload_0])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0 :istore_0])))
+(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0 :istore_0 :iload_0 :iload_0])))
 (is (= false (uses-vars-ok? 0 [:istore_0 :iload_1 :istore_0])))
-
 (is (= true (uses-vars-ok? 1 [:iload_0])))
 (is (= false (uses-vars-ok? 1 [:iload_0 :iload_1])))
 
+
+(defn is-valid?
+  "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
+  [s]
+  (finishes-ireturn? s))
+
+(defn is-fertile?
+  "Master fertility filter: returns true if any children of this opcode sequence may be valid"
+  [s]
+  (no-ireturn? s))
+
+(defn get-children [n] (map #(conj n %) (keys opcodes)))
+
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
-  [n]
-  (filter #(passes? opcode-sequence-filter %)
-         (apply cartesian-product (repeat n (keys opcodes)))))
+  [max-depth]
+  (rest (tree-seq #(< (count %) max-depth) get-children '[])))
 
 (defn count-storage-ops
   "Count the number of operations writing to a local variable in the supplied sequence"
@@ -297,3 +309,5 @@
   (map-indexed (fn [idx itm] (assoc itm :seq-num idx))
                (mapcat identity
                        (map (partial expand-opcodes m) (opcode-sequence n)))))
+
+
