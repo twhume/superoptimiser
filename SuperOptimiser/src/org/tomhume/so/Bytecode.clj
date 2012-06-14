@@ -14,11 +14,19 @@
   (let [args (flatten argseq)
         opcode ((opcodes op) :opcode)]
   (cond
-    (nil? ((opcodes op) :args)) (new InsnNode opcode)
     (= :istore op) (new VarInsnNode opcode (first args))
+    (= :istore_0 op) (new VarInsnNode 54 0)
+    (= :istore_1 op) (new VarInsnNode 54 1)
+    (= :istore_2 op) (new VarInsnNode 54 2)
+    (= :istore_3 op) (new VarInsnNode 54 3)
     (= :iload op) (new VarInsnNode opcode (first args))
+    (= :iload_0 op) (new VarInsnNode 21 0)
+    (= :iload_1 op) (new VarInsnNode 21 1)
+    (= :iload_2 op) (new VarInsnNode 21 2)
+    (= :iload_3 op) (new VarInsnNode 21 3)
     (= :iinc op) (new IincInsnNode (first args) (second args)) 
     (= :bipush op) (new IntInsnNode opcode (first args)) 
+    (nil? ((opcodes op) :args)) (new InsnNode opcode)
     :else nil)))
 
 (defn add-opcode-and-args
@@ -36,7 +44,7 @@
       (if (empty? codes) l
         (recur (add-opcode-and-args l codes))))))
 
-(is (= 2 (. (get-instructions '(:iload 0 :ireturn)) size)))
+(is (= 2 (. (get-instructions '(:iload_0 :ireturn)) size)))
 (is (= 1 (. (get-instructions '(:ireturn)) size)))
 
 (defn get-class-bytes
