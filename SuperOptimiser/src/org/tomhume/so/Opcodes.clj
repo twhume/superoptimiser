@@ -68,14 +68,14 @@
 ;              :ifle {:opcode 158 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
 
               :iinc {:opcode 132 :args [:local-var, :s-byte] :opstack-needs 0 :opstack-effect 0}
-              :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
+;              :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
               
               ; Commented out as these are just shortcuts for iload
               
-;              :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
-;              :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
-;              :iload_2 {:opcode 28 :opstack-needs 0 :opstack-effect 1}
-;              :iload_3 {:opcode 29 :opstack-needs 0 :opstack-effect 1}
+              :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
+              :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
+              :iload_2 {:opcode 28 :opstack-needs 0 :opstack-effect 1}
+              :iload_3 {:opcode 29 :opstack-needs 0 :opstack-effect 1}
               :imul {:opcode 104 :opstack-needs 2 :opstack-effect -1}
               :ineg {:opcode 116 :opstack-needs 1 :opstack-effect 0}
               :ior {:opcode 128 :opstack-needs 2 :opstack-effect -1}
@@ -89,10 +89,10 @@
  
               ; Commented out as these are just shortcuts for istore
               
-;              :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
-;              :istore_1 {:opcode 60 :opstack-needs 1 :opstack-effect -1}
-;              :istore_2 {:opcode 61 :opstack-needs 1 :opstack-effect -1}
-;              :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
+              :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
+              :istore_1 {:opcode 60 :opstack-needs 1 :opstack-effect -1}
+              :istore_2 {:opcode 61 :opstack-needs 1 :opstack-effect -1}
+              :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
               :isub {:opcode 100 :opstack-needs 2 :opstack-effect -1}
               :iushr {:opcode 124 :opstack-needs 2 :opstack-effect -1}
               :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}})
