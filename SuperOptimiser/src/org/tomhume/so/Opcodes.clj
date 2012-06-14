@@ -83,7 +83,7 @@
               :ireturn {:opcode 172 :opstack-needs 1 :opstack-effect 0}
               :ishl {:opcode 120 :opstack-needs 2 :opstack-effect -1}
               :ishr {:opcode 122 :opstack-needs 2 :opstack-effect -1}
-              :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
+;              :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
               
               ; TOODO ARGH. FORGOT TO TAKE INTO ACCOUNT POPPING OFF STACK UNTIL HERE - RECHECK ABOVE ENTRIES
  
@@ -248,20 +248,21 @@
 
 (defn is-valid?
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
-  [s]
-  (finishes-ireturn? s))
+  [n s]
+  (and (finishes-ireturn? s) (uses-vars-ok? n s) (uses-operand-stack-ok? s) (contains-no-redundant-pairs? s)))
 
 (defn is-fertile?
-  "Master fertility filter: returns true if any children of this opcode sequence may be valid"
-  [s]
-  (no-ireturn? s))
+  "Master fertility filter: returns true if any children of this opcode sequence s with n arguments may be valid"
+  [n s]
+  (and (no-ireturn? s) (uses-vars-ok? n s) (uses-operand-stack-ok? s) (contains-no-redundant-pairs? s)))
 
-(defn get-children [n] (map #(conj n %) (keys opcodes)))
+(defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s %) (keys opcodes))))
 
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
-  [max-depth]
-  (rest (tree-seq #(< (count %) max-depth) get-children '[])))
+  [max-depth num-args]
+  (let [validity-filter (partial is-valid? num-args) fertile-children (partial get-children num-args)]
+    (filter validity-filter (rest (tree-seq #(< (count %) max-depth) fertile-children '[])))))
 
 (defn count-storage-ops
   "Count the number of operations writing to a local variable in the supplied sequence"
@@ -308,6 +309,6 @@
   [n m]
   (map-indexed (fn [idx itm] (assoc itm :seq-num idx))
                (mapcat identity
-                       (map (partial expand-opcodes m) (opcode-sequence n)))))
+                       (map (partial expand-opcodes m) (opcode-sequence n m)))))
 
 
