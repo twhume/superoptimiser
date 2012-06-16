@@ -1,4 +1,5 @@
 (ns org.tomhume.so.PruningTests)
+(use 'org.tomhume.so.Opcodes)
 
 ; Lets us measure the effectiveness of the pruning strategies we have in
 ; place, by running Monte Carlo-style tests; pick a random fertile sequence
@@ -7,38 +8,23 @@
 
 (use '[org.tomhume.so.Opcodes])
 
-(defn is-fertile?
-  "Filter predicate testing the fertility of the supplied sequence"
-  [s]
-  (and (uses-operand-stack-ok? s) (contains-no-redundant-pairs? s)))
-
-(defn is-valid?
-  "Filter predicate testing the validity of the supplied sequence"
-  [s]
-  true
-  (finishes-ireturn? s))
-
-(defn get-children
-  "Returns a list of fertile child sequences of the supplied sequence. A fertile sequence may not itself be valid, but has the potential of valid children"
-  [s]
-  (let [ops (keys opcodes)]
-    (filter is-fertile? (map #(conj s %) (keys opcodes)))))
+(def fertility-filter (partial is-fertile? 1))
 
 (defn rand-opcode-sequence
   "Returns a single valid opcode sequence, randomly generated, of length n"
   [n]
   (loop [depth 0 s '[]]
-    (let [fertile-children (get-children s) ]
+    (let [fertile-children (get-children 1 s) ]
     (if (= depth n) s
       (recur (inc depth) (nth fertile-children (rand-int (count fertile-children))))))))
 
 (defn prune-stats
   "Runs a statistical test of the pruning algorithm on sequences from length 1 to n inclusive, return the average number of children available at each length"
   [n]
-  (let [num-tests 10000]
+  (let [num-tests 100000]
 	  (for [seq-length (range 0 n)]
 	    (float ( / (reduce +
-	            (map #(count (get-children %))
+	            (map #(count (get-children 1 %))
 	                 (repeatedly num-tests (partial rand-opcode-sequence seq-length)))) num-tests)))))
 
 
