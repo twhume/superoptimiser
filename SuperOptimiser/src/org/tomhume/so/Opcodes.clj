@@ -1,7 +1,6 @@
 (ns org.tomhume.so.Opcodes)
 (use 'clojure.test)
 (use 'clojure.math.combinatorics)
-(use 'org.tomhume.so.TestMap)
 
 ; Each opcode is a key/map pair, where the key is a Keyword, the name of the opcode
 ; The map contains a number of fields; compulsory ones:
@@ -169,16 +168,6 @@
 (is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :ixor :ixor])))
 (is (= false (uses-operand-stack-ok? [:iload_0 :iload_0 :iinc :ixor :ixor])))
 
-
-; add a filter to check for really obvious redundancy (e.g. ireturn not final in a sequence w/o jumps)
-
-; TBD:
-; are there are least 2 different opcodes in the sequence?
-; are there no reads from the operand stack before it has been written to?
-; are there no reads from a local variable before it has been written to?
-
-(def opcode-sequence-filter (test-map [finishes-ireturn? uses-operand-stack-ok?]))
-
 (defn update-varmap
   "Takes a sequence starting with an opcode and followed by arguments, returns nil or an updated key/value pair for a hash"
   [s]
@@ -229,8 +218,8 @@
          
          ; otherwise record the read-write state; skip the appropriate number of instructions; carry on
           
-	        :else (if (= nil vm-update) (recur (nthrest head (+ 1 (count (:args (op opcodes))))) last-op)
-                 (recur (nthrest head (+ 1 (count (:args (op opcodes))))) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
+	        :else (if (= nil vm-update) (recur (rest head) last-op)
+                 (recur (rest head) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
 
 (is (= true (uses-vars-ok? 0 [:ixor])))
 (is (= false (uses-vars-ok? 0 [:iload_0])))
@@ -243,8 +232,7 @@
 (is (= true (uses-vars-ok? 0 [:istore_0 :iload_0 :istore_0 :iload_0 :iload_0])))
 (is (= false (uses-vars-ok? 0 [:istore_0 :iload_1 :istore_0])))
 (is (= true (uses-vars-ok? 1 [:iload_0])))
-(is (= false (uses-vars-ok? 1 [:iload_0 :iload_1])))
-
+(is (= false (uses-vars-ok? 1 [:bipush :iload_3 :ireturn])))
 
 (defn is-valid?
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
@@ -291,18 +279,12 @@
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
   [m s]
-  (let [seq-length (count s) max-vars (+ m (count-storage-ops s))
-        expanded-opcode-sequence-filter (test-map [(partial uses-vars-ok? m)])]
-
-    ; Expand all the arguments in the sequence into sequences of possible values,
-    ; get the Cartesian product of the resulting sequence (i.e. all its possibilities)
-    ; and put that into a hash, keeping the sequence length and maximum number of variables handy
+  (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
     
     (map #(hash-map :length seq-length :vars max-vars :code % )
-         (filter #(passes? expanded-opcode-sequence-filter %)
               (apply cartesian-product
                 (map (partial expand-arg max-vars) 
-                     (flatten (map #(cons % (:args (opcodes %))) s))))))))
+                     (flatten (map #(cons % (:args (opcodes %))) s)))))))
 
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
