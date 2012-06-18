@@ -120,12 +120,23 @@
 (is (= false (finishes-ireturn? [:ireturn :iushr])))
 (is (= true (finishes-ireturn? [:ixor :ireturn ])))
 
+; Also any operation that takes 2 entries, calculates a result and is followed by a pop is redundant; could be replaced by a pop2
+; and 2 constant-pushing operations followed by a pop2
+
 (def redundant-pairs '(
                         [:swap :swap]       ; Two swaps leave things as they were
                         [:pop :pop]         ; Could be replaced by :pop2
                         [:ineg :ineg]       ; Two negations get us back where we started
                         [:iconst_0 :idiv]   ; Divide by zero, never fun
                         [:iconst_0 :irem]   ; Divide by zero, never fun
+                        [:iconst_0 :pop]
+                        [:iconst_m1 :pop]
+                        [:iconst_1 :pop]
+                        [:iconst_2 :pop]
+                        [:iconst_3 :pop]
+                        [:iconst_4 :pop]
+                        [:iconst_5 :pop]
+                        [:bipush :pop]
                         ))
 
 (defn contains-no-redundant-pairs?
@@ -335,6 +346,8 @@
         
         ; INEG has no effect - the topmost item retains its influence
         (= :ineg op) (recur (rest head) infl-map)
+        ; IINC does the same. It'll increase values of a variable.
+        (= :iinc op) (recur (rest head) infl-map)
 
         ; check that the item we are returning has been influenced by every input variable
         (= :ireturn op) (has-influence? nv (first (:stack infl-map)))
@@ -403,6 +416,7 @@
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
+    (retains-influence? n s)
 ))
 
 (defn is-fertile?
