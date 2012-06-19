@@ -35,6 +35,12 @@
         (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
+(defn superoptimise-nocheck
+  "Main driver function for the SuperOptimiser - doesn't do equivalence testing, uses pmap"
+  [seq-len c-root m-name m-sig tm]
+        (pmap #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
+             (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))
+
 (defn superoptimise-pmap
   "Main driver function for the SuperOptimiser - using pmap"
   [seq-len c-root m-name m-sig tm]
