@@ -426,7 +426,8 @@
     (no-ireturn? s)
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
-    (contains-no-redundant-pairs? s)))
+    (contains-no-redundant-pairs? s)
+))
 
 (defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s %) (keys opcodes))))
 
