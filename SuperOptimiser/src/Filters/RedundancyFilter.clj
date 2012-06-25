@@ -43,9 +43,9 @@
       
       :dup_x1 (assoc state-map :stack (concat (take 2 stack) (list (first stack)) (nthrest stack 2)))
       :dup_x2 (assoc state-map :stack (concat (take 3 stack) (list (first stack)) (nthrest stack 3)))
-;      :dup2
-;      :dup2_x1
-;      :dup2_x2
+      :dup2 (assoc state-map :stack (concat (take 2 stack) stack))
+      :dup2_x1 (assoc state-map :stack (concat (take 3 stack) (take 2 stack) (nthrest stack 3)))
+      :dup2_x2 (assoc state-map :stack (concat (take 4 stack) (take 2 stack) (nthrest stack 4)))
       
       :pop (assoc state-map :stack (rest stack))
       :pop2 (assoc state-map :stack (nthrest stack 2))
@@ -118,11 +118,22 @@
         :dup_x2)))
 
 (is (=
-      '{:stack ([:constant 3] [:constant 2][:constant 1][:constant 3][:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      '{:stack ([:constant 3] [:constant 2] [:constant 1] [:constant 3] [:constant 2] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
       (add-state
         '{:stack ([:constant 3] [:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
-        :dup_x2)))
+        :dup2_x1)))
 
+(is (=
+      '{:stack ([:constant 3] [:constant 2] [:constant 1] [:constant 0] [:constant 3] [:constant 2]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 3] [:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :dup2_x2)))
+
+(is (=
+      '{:stack ([:constant 3] [:constant 2] [:constant 3] [:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 3] [:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :dup2)))
 
 (is (=
       '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
