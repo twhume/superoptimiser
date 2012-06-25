@@ -211,6 +211,7 @@
         (recur (rest remainder) (add-state cur-state cur-op) (cons cur-state past-states))))))
 
 (is (= true (no-redundancy? 1 '[:iload_0 :ireturn])))
+(is (= false (no-redundancy? 1 '[:iload_0 :iload_0 :iload_1 :pop2 :ireturn])))
 (is (= true (no-redundancy? 1 '[:iload_0 :ineg :ireturn])))
 (is (= true (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :ireturn])))
 (is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :pop :ireturn])))
