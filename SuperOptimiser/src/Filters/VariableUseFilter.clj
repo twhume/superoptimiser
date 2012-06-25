@@ -2,6 +2,11 @@
 (use 'clojure.test)
 (use 'Main.Global)
 
+; The VariableUseFilter checks that all accesses to variables occur only once a variable has had a value
+; written into it (either at startup, because it corresponds to an argument to the method, or thanks to 
+; a later ISTORE operation). It also checks that variables written to are subsequently read, before being
+; written to again. Two consecutive writes to a variable mean one such write is redundant.
+
 (defn update-varmap
   "Takes a sequence starting with an opcode and followed by arguments, returns nil or an updated key/value pair for a hash"
   [s]

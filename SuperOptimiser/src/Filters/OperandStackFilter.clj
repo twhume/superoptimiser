@@ -2,6 +2,10 @@
 (use 'clojure.test)
 (use 'Main.Global)
 
+; The OperandStackFilter checks for stack underflows: it runs through the operations in a candidate sequence,
+; looks to see how many stack entries they require, and returns false if they ever require more entries on the
+; stack than can currently be available.
+
 (defn uses-operand-stack-ok?
   "Does the supplied sequence read from the operand stack only when there's sufficient entries in it?"
   [l]

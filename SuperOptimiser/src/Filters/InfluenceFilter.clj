@@ -3,6 +3,10 @@
 (use 'clojure.test)
 (use 'Main.Global)
 
+; The Influence Filter tracks the flow of "influence" of arguments to the candidate sequence through to its
+; eventual :ireturn. If a candidate's output does not depend on all its input, or on stack or variable entries
+; which haven't been influenced by its input, then the filter returns false.
+
 (defn has-influence?
   "Is the influence stack entry recording influence by num-args input variables?"
   [num-args entry]

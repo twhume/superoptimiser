@@ -2,6 +2,8 @@
 (use 'clojure.test)
 (use 'Main.Global)
 
+; The ReturnFilter does very simple checking indeed, on the presence or absence of an :ireturn operation
+
 (defn no-ireturn?
   "Does the supplied sequence not include an ireturn?"
   [l]
