@@ -2,6 +2,7 @@
 (use 'clojure.set)
 (use 'clojure.test)
 (use 'clojure.math.combinatorics)
+(use '[Filters.RedundancyFilter :only (no-redundancy?)])
 
 ; Each opcode is a key/map pair, where the key is a Keyword, the name of the opcode
 ; The map contains a number of fields; compulsory ones:
@@ -417,6 +418,7 @@
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
     (retains-influence? n s)
+    (no-redundancy? n s)
 ))
 
 (defn is-fertile?
@@ -427,6 +429,7 @@
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
+    (no-redundancy? n s)
 ))
 
 (defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s %) (keys opcodes))))
