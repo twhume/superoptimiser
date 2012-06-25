@@ -2,7 +2,7 @@
 (import 'clojure.lang.Reflector)
 (use 'Main.Bytecode)
 (use 'Main.Opcodes)
-(use 'org.tomhume.so.TestMap)
+(use 'Util.TestMap)
 
 
 ; Main driver functions for the SuperOptimiser. Kept here so they don't pollute your individual SO stuff

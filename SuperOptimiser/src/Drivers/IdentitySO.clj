@@ -1,5 +1,5 @@
 (ns Drivers.IdentitySO)
-(use 'org.tomhume.so.TestMap)
+(use 'Util.TestMap)
 (use 'Main.Superoptimise)
 
 ; Superoptimises the Identity function

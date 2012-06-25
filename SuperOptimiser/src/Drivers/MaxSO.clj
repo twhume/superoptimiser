@@ -1,5 +1,5 @@
 (ns Drivers.MaxSO)
-(use 'org.tomhume.so.TestMap)
+(use 'Util.TestMap)
 (use 'Main.Superoptimise)
 
 (import '(clojure.lang DynamicClassLoader))
@@ -35,4 +35,4 @@
 
 (time 
   (doall
-        (superoptimise 4 class-name method-name method-signature eq-tests-filter)))
+        (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))

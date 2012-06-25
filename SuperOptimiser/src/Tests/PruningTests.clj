@@ -1,5 +1,5 @@
-(ns org.tomhume.so.PruningTests)
-(use 'org.tomhume.so.Opcodes)
+(ns Tests.PruningTests)
+(use 'Main.Opcodes)
 
 ; Lets us measure the effectiveness of the pruning strategies we have in
 ; place, by running Monte Carlo-style tests; pick a random fertile sequence

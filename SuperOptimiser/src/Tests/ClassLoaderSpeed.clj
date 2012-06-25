@@ -1,5 +1,5 @@
-(ns org.tomhume.so.ClassLoaderSpeed)
-(use 'org.tomhume.so.Bytecode)
+(ns Tests.ClassLoaderSpeed)
+(use 'Main.Bytecode)
 (import '(org.objectweb.asm ClassWriter Opcodes))
 (import '(org.objectweb.asm.tree  AbstractInsnNode VarInsnNode InsnNode IincInsnNode IntInsnNode ClassNode MethodNode InsnList))
 

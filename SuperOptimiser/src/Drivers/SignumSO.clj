@@ -1,5 +1,5 @@
 (ns Drivers.SignumSO)
-(use 'org.tomhume.so.TestMap)
+(use 'Util.TestMap)
 (use 'Main.Superoptimise)
 
 (import '(clojure.lang DynamicClassLoader))
