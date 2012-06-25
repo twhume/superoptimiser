@@ -41,8 +41,8 @@
 	    :bipush (inc-max :max-const (assoc state-map :stack (conj stack [:constant (:max-const state-map)])))
       :dup (assoc state-map :stack (conj stack (first stack)))
       
-;      :dup_x1
-;      :dup_x2
+      :dup_x1 (assoc state-map :stack (concat (take 2 stack) (list (first stack)) (nthrest stack 2)))
+      :dup_x2 (assoc state-map :stack (concat (take 3 stack) (list (first stack)) (nthrest stack 3)))
 ;      :dup2
 ;      :dup2_x1
 ;      :dup2_x2
@@ -98,6 +98,31 @@
 
 (is (= '{:stack ([:constant 0] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
        (add-state (add-state (init-state 1) :bipush) :dup)))
+
+(is (=
+      '{:stack ([:constant 1] [:constant 0][:constant 1]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :dup_x1)))
+
+(is (=
+      '{:stack ([:constant 2] [:constant 1][:constant 2][:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :dup_x1)))
+
+(is (=
+      '{:stack ([:constant 2] [:constant 1][:constant 0][:constant 2]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :dup_x2)))
+
+(is (=
+      '{:stack ([:constant 3] [:constant 2][:constant 1][:constant 3][:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 3] [:constant 2] [:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :dup_x2)))
+
 
 (is (=
       '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
