@@ -21,7 +21,7 @@
 (defn prune-stats
   "Runs a statistical test of the pruning algorithm on sequences from length 1 to n inclusive, return the average number of children available at each length"
   [n]
-  (let [num-tests 100000]
+  (let [num-tests 1000]
 	  (for [seq-length (range 0 n)]
 	    (float ( / (reduce +
 	            (map #(count (get-children 1 %))

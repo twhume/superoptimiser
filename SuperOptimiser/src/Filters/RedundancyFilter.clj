@@ -1,6 +1,6 @@
 (ns Filters.RedundancyFilter)
 (use 'clojure.test)
-(use 'org.tomhume.so.Opcodes)
+(use 'Main.Global)
 
 ; The redundancy filter looks for sequences of redundant operations in a list of JVM opcodes. It does this
 ; by creating a data structure corresponding to the state of frame; by versioning writes to the frame;
@@ -28,7 +28,7 @@
   [state-map]
   (assoc state-map
          :vars (apply hash-map (let [i (atom (dec (:max-var state-map)))]
-                                 (interleave (keys m) (repeatedly #(vector :var (swap! i inc))))))
+                                 (interleave (keys (:vars state-map)) (repeatedly #(vector :var (swap! i inc))))))
          :max-var (+ 4 (:max-var state-map))))
 
 ; When we add a state 

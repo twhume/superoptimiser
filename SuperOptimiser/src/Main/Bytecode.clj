@@ -1,6 +1,6 @@
-(ns org.tomhume.so.Bytecode)
+(ns Main.Bytecode)
 (use 'clojure.test)
-(use 'org.tomhume.so.Opcodes)
+(use 'Main.Global)
 (import '(clojure.lang DynamicClassLoader))
 (import '(java.io FileOutputStream))
 (import '(org.objectweb.asm ClassWriter Opcodes))
@@ -76,14 +76,18 @@
 
 (defn load-class
   "Load a class of the given name from the given bytecode"
-  [name bytecode]
-;  (let [^DynamicClassLoader cl (clojure.lang.RT/baseLoader)]
-  (let [^DynamicClassLoader cl (new clojure.lang.DynamicClassLoader)]
-    (.defineClass cl name bytecode '())))
+  
+  ([name bytecode]
+    (let [^DynamicClassLoader cl (new clojure.lang.DynamicClassLoader)]
+      (.defineClass cl name bytecode '())))
+  ([cl name bytecode]
+    (.defineClass cl name bytecode '()))
+  )
+
 
 (defn get-class
   "Creates and loads a class file with the given name"
-  [code className methodName methodSig]
+  [code className methodName methodSig seqnum]
   (try
     (load-class className (get-class-bytes code className methodName methodSig))
     (catch ClassFormatError cfe nil)))

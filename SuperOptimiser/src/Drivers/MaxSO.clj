@@ -1,6 +1,6 @@
-(ns org.tomhume.so.MaxSO)
+(ns Drivers.MaxSO)
 (use 'org.tomhume.so.TestMap)
-(use 'org.tomhume.so.Main)
+(use 'Main.Superoptimise)
 
 (import '(clojure.lang DynamicClassLoader))
 (import 'clojure.lang.Reflector)

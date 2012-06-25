@@ -1,6 +1,6 @@
-(ns org.tomhume.so.SignumSO)
+(ns Drivers.SignumSO)
 (use 'org.tomhume.so.TestMap)
-(use 'org.tomhume.so.Main)
+(use 'Main.Superoptimise)
 
 (import '(clojure.lang DynamicClassLoader))
 (import 'clojure.lang.Reflector)
