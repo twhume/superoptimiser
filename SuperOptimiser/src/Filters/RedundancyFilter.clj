@@ -78,7 +78,7 @@
       :istore_2 (assoc state-map :stack (rest stack) :vars (assoc vars 2 (first stack)))
       :istore_3 (assoc state-map :stack (rest stack) :vars (assoc vars 3 (first stack)))
 
-      :ineg state-map
+      :ineg (inc-max :max-calc (assoc state-map :stack (cons [:calc (:max-calc state-map)] (rest stack))))
       :ireturn (assoc state-map :stack (rest stack))
       :iinc (inc-all-vars state-map)
 
@@ -183,14 +183,35 @@
         '{:stack ([:constant 6]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 [:arg-0] 1 nil 2 nil 3 nil}}
         :iinc)))
 
+(defn state-recurred?
+  "Has cur-state ever occurred before, in the list of states supplied as past-states?"
+  [cur-state past-states]
+  (loop [states-remainder past-states]
+    (let [examined-state (first states-remainder)]
+;	    (println "Current state=" cur-state)
+;	    (println "Examined state=" examined-state)
+;	    (println "-----------------")
+	    (cond
+	      (empty? examined-state) false
+	      (and
+	        (= (:vars examined-state) (:vars cur-state))
+	        (= (:stack examined-state) (:stack cur-state))) true
+	      :else    
+	       (recur (rest states-remainder))))))
 
 (defn no-redundancy?
   "Does the supplied candidate (presuming num-args arguments) contain no redundant sequence of operations?"
   [num-args s]
-  (loop [remainder s state (init-state num-args)]
-    (if (empty? remainder) true
-      (recur (rest remainder) state))))
+  (loop [remainder s cur-state (init-state num-args) past-states '()]
+    (let [cur-op (first remainder)]
+      (cond
+        (empty? remainder) true
+        (state-recurred? cur-state past-states) false
+        :else
+        (recur (rest remainder) (add-state cur-state cur-op) (cons cur-state past-states))))))
 
-;(is (= true (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :ireturn])))
-;(is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :ipop :ireturn])))
-;(is (= true (no-redundancy? 1 '[:iload_0 :iconst_1 :istore_1 :iload_1 :ipop :ireturn])))
+(is (= true (no-redundancy? 1 '[:iload_0 :ireturn])))
+(is (= true (no-redundancy? 1 '[:iload_0 :ineg :ireturn])))
+(is (= true (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :ireturn])))
+(is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :pop :ireturn])))
+(is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :istore_1 :iload_1 :pop :ireturn])))
