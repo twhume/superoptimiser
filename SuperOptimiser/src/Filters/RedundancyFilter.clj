@@ -13,15 +13,23 @@
   "Initialises a map for the state of the code sequence, with the number of arguments passed in"
   [num-args]
   {:stack '()        ; A structure corresponding to the operand stack of the sequence
-   :max-var num-args ; The highest version number we've given to a variable
+   :max-var 1 ; The highest version number we've given to a variable
    :max-const 0      ; The highest version number we've given to a constant
    :max-calc 0       ; The highest version number we've given to a calculation
-   :vars (apply hash-map (interleave (repeat 0) (map #(keyword(str "arg-" %)) (range num-args))))})
+   :vars (apply hash-map (interleave (range 4) (map #(keyword (if (>= % num-args) nil (str "arg-" %))) (range 4))))})
 
 (defn inc-max
   "Increments a max value in the state map passed in"
   [which state-map]
   (assoc state-map which (inc (which state-map))))
+
+(defn inc-all-vars
+  "Increments the variable version number for every variable being tracked"
+  [state-map]
+  (assoc state-map
+         :vars (apply hash-map (let [i (atom (dec (:max-var state-map)))]
+                                 (interleave (keys m) (repeatedly #(vector :var (swap! i inc))))))
+         :max-var (+ 4 (:max-var state-map))))
 
 ; When we add a state 
 
@@ -50,6 +58,9 @@
         :imul
         :ior
         :irem
+        :ishr
+        :iushr
+        :ishl
         :isub
         :ixor) (inc-max :max-calc (assoc state-map :stack (cons [:calc (:max-calc state-map)] (nthrest stack 2))))
       
@@ -62,41 +73,36 @@
       :iconst_4 (assoc state-map :stack (cons [:value 4] stack))
       :iconst_5 (assoc state-map :stack (cons [:value 5] stack))
 
-      :iload_0 (assoc state-map :stack (rest stack) :vars (assoc vars 0 (first stack)))
-      :iload_1 (assoc state-map :stack (rest stack) :vars (assoc vars 1 (first stack)))
-      :iload_2 (assoc state-map :stack (rest stack) :vars (assoc vars 2 (first stack)))
-      :iload_3 (assoc state-map :stack (rest stack) :vars (assoc vars 3 (first stack)))
+      :istore_0 (assoc state-map :stack (rest stack) :vars (assoc vars 0 (first stack)))
+      :istore_1 (assoc state-map :stack (rest stack) :vars (assoc vars 1 (first stack)))
+      :istore_2 (assoc state-map :stack (rest stack) :vars (assoc vars 2 (first stack)))
+      :istore_3 (assoc state-map :stack (rest stack) :vars (assoc vars 3 (first stack)))
 
-;              :iinc
+      :ineg state-map
+      :ireturn (assoc state-map :stack (rest stack))
+      :iinc (inc-all-vars state-map)
+
+      :iload_0 (assoc state-map :stack (cons (get vars 0) stack))
+      :iload_1 (assoc state-map :stack (cons (get vars 1) stack))
+      :iload_2 (assoc state-map :stack (cons (get vars 2) stack))
+      :iload_3 (assoc state-map :stack (cons (get vars 3) stack))
+
               
-;              :iload_1
-;              :iload_2
-;              :iload_3
-;              :ineg
-;              :ireturn
-;              :ishl
-;              :ishr
-              
-;              :istore_0
-;              :istore_1
-;              :istore_2
-;              :istore_3
-;              :iushr
 	    )))
 
 ; Lots of unit tests...
 
 (is (=
-      '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0}}
+      '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
       (add-state (init-state 1) :bipush)))
 
-(is (= '{:stack ([:constant 0] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0}}
+(is (= '{:stack ([:constant 0] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
        (add-state (add-state (init-state 1) :bipush) :dup)))
 
 (is (=
-      '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0}}
+      '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
       (add-state
-        '{:stack ([:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0}}
+        '{:stack ([:constant 1] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
         :pop)))
 
 (is (=
@@ -129,7 +135,18 @@
 (is (= '{:stack (), :max-var 1, :max-const 1, :max-calc 0, :vars {0 [:constant 0]}}
       (add-state
         '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0}}
+        :istore_0)))
+
+(is (= '{:stack ([:constant 5]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 [:constant 5]}}
+      (add-state
+        '{:stack (), :max-var 1, :max-const 1, :max-calc 0, :vars {0 [:constant 5]}}
         :iload_0)))
+
+(is (= '{:stack ([:constant 6]), :max-var 5, :max-const 1, :max-calc 0, :vars {0 [:var 1] 1 [:var 2] 2 [:var 3] 3 [:var 4]}}
+      (add-state
+        '{:stack ([:constant 6]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 [:arg-0] 1 nil 2 nil 3 nil}}
+        :iinc)))
+
 
 (defn no-redundancy?
   "Does the supplied candidate (presuming num-args arguments) contain no redundant sequence of operations?"
