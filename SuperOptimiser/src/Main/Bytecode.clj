@@ -8,6 +8,13 @@
 
 ; This package handles the creation of Java class files.
 
+(defn instantiate-classloader
+  "Returns a new instance of the Class Loader - used to recreate it when necessary"
+  [cur]
+  (new clojure.lang.DynamicClassLoader))
+
+(def classloader (atom (new clojure.lang.DynamicClassLoader)))
+
 (defn add-opcode
   "Creates a child of an AbstractInsNode and returns it"
   [op & argseq]
@@ -76,21 +83,20 @@
 
 (defn load-class
   "Load a class of the given name from the given bytecode"
-  
-  ([name bytecode]
-    (let [^DynamicClassLoader cl (new clojure.lang.DynamicClassLoader)]
-      (.defineClass cl name bytecode '())))
-  ([cl name bytecode]
-    (.defineClass cl name bytecode '()))
+  ([name bytecode cl]
+      (.defineClass cl name bytecode '()))
   )
 
 
 (defn get-class
   "Creates and loads a class file with the given name"
   [code className methodName methodSig seqnum]
-  (try
-    (load-class className (get-class-bytes code className methodName methodSig))
-    (catch ClassFormatError cfe nil)))
+    (try
+      (let [full-class-name (str className "-" seqnum)]
+        (load-class full-class-name
+                    (get-class-bytes code full-class-name methodName methodSig)
+                    (new clojure.lang.DynamicClassLoader)))
+      (catch ClassFormatError cfe nil)))
 
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f2)

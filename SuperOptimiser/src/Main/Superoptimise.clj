@@ -4,7 +4,6 @@
 (use 'Main.Opcodes)
 (use 'Util.TestMap)
 
-
 ; Main driver functions for the SuperOptimiser. Kept here so they don't pollute your individual SO stuff
 
 (defn invoke-method [class method & arg] (Reflector/invokeStaticMethod class method (into-array arg)))
