@@ -216,3 +216,4 @@
 (is (= true (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :ireturn])))
 (is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :pop :ireturn])))
 (is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :istore_1 :iload_1 :pop :ireturn])))
+(is (= false (no-redundancy? 1 '[:iload_0 :istore_0 :ireturn])))
