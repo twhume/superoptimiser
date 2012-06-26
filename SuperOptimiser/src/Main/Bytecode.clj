@@ -95,7 +95,7 @@
       (let [full-class-name (str className "-" seqnum)]
         (load-class full-class-name
                     (get-class-bytes code full-class-name methodName methodSig)
-                    (new clojure.lang.DynamicClassLoader)))
+                    (if (= 0 (mod seqnum 50000)) (swap! classloader instantiate-classloader) @classloader)))
       (catch ClassFormatError cfe nil)))
 
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
