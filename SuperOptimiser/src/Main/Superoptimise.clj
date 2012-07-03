@@ -2,7 +2,6 @@
 (import 'clojure.lang.Reflector)
 (use 'Main.Bytecode)
 (use 'Main.Opcodes)
-(use 'Util.TestMap)
 
 
 ; Main driver functions for the SuperOptimiser. Kept here so they don't pollute your individual SO stuff
@@ -17,34 +16,40 @@
 ; generate all 2-sequence bytecodes
 ; map each one to a class file
 ; load the class file
-; pass it through the equivalence test map
+; pass it through the equivalence tests
 
 (defn check-passes
   "check if a class passes its equivalence tests"
-  [tm class]
+  [tests class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
-    (try (passes? tm (:class class)) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))))
+    (loop [remaining-tests tests]
+      (let [next-test (first remaining-tests)]
+	      (cond
+	        (empty? remaining-tests) true
+	        (not (try (next-test (:class class)) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))) false
+	        :else (recur (rest remaining-tests)))
+       ))))
 
 ; stick a "(do (println e)" before the false to get a log of errors - we should try and prevent these
 
 (defn superoptimise
   "Main driver function for the SuperOptimiser"
-  [seq-len c-root m-name m-sig tm]
-  (filter (partial check-passes tm)
+  [seq-len c-root m-name m-sig tests]
+  (filter (partial check-passes tests)
         (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
 (defn superoptimise-nocheck
   "Main driver function for the SuperOptimiser - doesn't do equivalence testing, uses pmap"
-  [seq-len c-root m-name m-sig tm]
+  [seq-len c-root m-name m-sig tests]
         (pmap #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))
 
 (defn superoptimise-pmap
   "Main driver function for the SuperOptimiser - using pmap"
-  [seq-len c-root m-name m-sig tm]
-  (filter (partial check-passes tm)
+  [seq-len c-root m-name m-sig tests]
+  (filter (partial check-passes tests)
         (pmap #(assoc % :class (get-class (:code %)  c-root m-name m-sig (:seq-num %)))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
@@ -52,15 +57,15 @@
 
 (defn make-classes
   "Takes a sequence s, maps all its entries into classes"
-  [c-root m-name m-sig tm s]
- (filter (partial check-passes tm) (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig)) s))
+  [c-root m-name m-sig tests s]
+ (filter (partial check-passes tests) (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig)) s))
 )
 
 (defn superoptimise-partitioned
   "Main driver function for the SuperOptimiser - with partitioned pmap and filtering"
-  [seq-len c-root m-name m-sig tm partition-size]
+  [seq-len c-root m-name m-sig tests partition-size]
   (apply concat
-         (pmap #(make-classes c-root m-name m-sig tm %)
+         (pmap #(make-classes c-root m-name m-sig tests %)
                (partition-all partition-size
                               (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))))
 

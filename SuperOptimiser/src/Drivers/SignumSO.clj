@@ -1,5 +1,4 @@
 (ns Drivers.SignumSO)
-(use 'Util.TestMap)
 (use 'Main.Superoptimise)
 
 (import '(clojure.lang DynamicClassLoader))
@@ -21,9 +20,9 @@
 (defn greater-than-one? [i]  (= 1 (invoke-method i method-name 999)))
 (defn greater-than-one-even? [i]  (= 1 (invoke-method i method-name 1000)))
 (defn less-than-minus-one? [i]  (= -1 (invoke-method i method-name -999)))
-(defn less-than-minus-one? [i]  (= -1 (invoke-method i method-name -1000)))
+(defn less-than-minus-one-even? [i]  (= -1 (invoke-method i method-name -1000)))
 
 
-(def eq-tests-filter (test-map [one? minus-one? is-zero? greater-than-one? less-than-minus-one?]))
+(def eq-tests-filter [less-than-minus-one-even? greater-than-one-even? one? minus-one? is-zero? greater-than-one? less-than-minus-one?])
 
 (time (doall (superoptimise-pmap 4 class-name method-name method-signature eq-tests-filter)))
