@@ -1,5 +1,4 @@
 (ns Drivers.MaxSO)
-(use 'Util.TestMap)
 (use 'Main.Superoptimise)
 
 (import '(clojure.lang DynamicClassLoader))
@@ -25,7 +24,7 @@
 (defn both-negative-revargs? [i]  (= -1 (invoke-method i method-name -3 -1)))
 
 
-(def eq-tests-filter (test-map [positive-is-bigger? positive-is-bigger-revargs? greater-than-zero? greater-than-zero-revargs? bigger-is-better? bigger-is-better-revargs? both-negative? both-negative-revargs?]))
+(def eq-tests-filter [positive-is-bigger? positive-is-bigger-revargs? greater-than-zero? greater-than-zero-revargs? bigger-is-better? bigger-is-better-revargs? both-negative? both-negative-revargs?])
 
 ; The code below is a double-check for our tests: basically, does java.lang.Math pass them?
 ;(let [^DynamicClassLoader cl (new clojure.lang.DynamicClassLoader) math (.loadClass cl "java.lang.Math")]

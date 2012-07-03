@@ -1,5 +1,4 @@
 (ns Drivers.IdentitySO)
-(use 'Util.TestMap)
 (use 'Main.Superoptimise)
 
 ; Superoptimises the Identity function
@@ -20,6 +19,6 @@
 (defn one-is-not-zero? [i] (not (= 1 (invoke-method i method-name 0))))
 (defn one-is-not-minus-one? [i] (not (= 1 (invoke-method i method-name -1))))
 
-(def eq-tests-filter (test-map [one-is-one? zero-is-zero? minus-one-is-minus-one? minint-is-minint? maxint-is-maxint? one-is-not-zero? one-is-not-minus-one?]))
+(def eq-tests-filter [minint-is-minint? minus-one-is-minus-one? maxint-is-maxint? one-is-one? zero-is-zero? one-is-not-zero? one-is-not-minus-one?])
 
-(time (doall (superoptimise-pmap 4 class-name method-name method-signature eq-tests-filter)))
+(time (dorun (superoptimise-pmap 4 class-name method-name method-signature eq-tests-filter)))
