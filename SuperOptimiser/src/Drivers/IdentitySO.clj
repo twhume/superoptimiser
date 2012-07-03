@@ -22,4 +22,4 @@
 
 (def eq-tests-filter (test-map [one-is-one? zero-is-zero? minus-one-is-minus-one? minint-is-minint? maxint-is-maxint? one-is-not-zero? one-is-not-minus-one?]))
 
-(time (doall (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter)))
+(time (doall (superoptimise-pmap 2 class-name method-name method-signature eq-tests-filter)))
