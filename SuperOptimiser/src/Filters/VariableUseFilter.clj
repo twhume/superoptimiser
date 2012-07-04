@@ -22,11 +22,13 @@
 	    (= op :istore_2) '(2 :write)
 	    (= op :istore_3) '(3 :write)
       (= op :istore) (seq [(nth s 1) :write])
+      (= op :iinc) (seq [(nth s 1) :write])
       :else nil)))
 
 (is (= '(0 :write) (update-varmap '[:istore_0])))
 (is (= '(3 :read) (update-varmap '[:iload_3])))
 (is (= '(7 :write) (update-varmap '[:istore 7])))
+(is (= '(1 :write) (update-varmap '[:iinc 1])))
 (is (= '(12 :read) (update-varmap '[:iload 12])))
 
 (defn uses-vars-ok?
@@ -38,14 +40,15 @@
 	      (cond
 	        (empty? head) true
          
-         ; If we're reading from a variable which has never been written, fail the sequence
+         ; If we're reading from, or incrementing, a variable which has never been written, fail the sequence
          
 	        (and (= op :iload_0) (= nil (get last-op 0))) false 
 	        (and (= op :iload_1) (= nil (get last-op 1))) false
 	        (and (= op :iload_2) (= nil (get last-op 2))) false
 	        (and (= op :iload_3) (= nil (get last-op 3))) false
           (and (= op :iload) (= nil (get last-op (nth head 1)))) false
-          
+          (and (= op :iinc) (= nil (get last-op (nth head 1)))) false
+
          ; handle :iload
          
          ; If we're writing from a variable which we last wrote to (i.e. overwriting data), fail the sequence
@@ -72,3 +75,4 @@
 (is (= false (uses-vars-ok? 0 [:istore_0 :iload_1 :istore_0])))
 (is (= true (uses-vars-ok? 1 [:iload_0])))
 (is (= false (uses-vars-ok? 1 [:bipush :iload_3 :ireturn])))
+(is (= false (uses-vars-ok? 1 [:iload_0 :iconst_m1 :istore_0 :iinc 1 -27 :ireturn])))
