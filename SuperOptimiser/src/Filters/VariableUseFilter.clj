@@ -47,7 +47,6 @@
 	        (and (= op :iload_2) (= nil (get last-op 2))) false
 	        (and (= op :iload_3) (= nil (get last-op 3))) false
           (and (= op :iload) (= nil (get last-op (nth head 1)))) false
-          (and (= op :iinc) (= nil (get last-op (nth head 1)))) false
 
          ; handle :iload
          
@@ -75,4 +74,3 @@
 (is (= false (uses-vars-ok? 0 [:istore_0 :iload_1 :istore_0])))
 (is (= true (uses-vars-ok? 1 [:iload_0])))
 (is (= false (uses-vars-ok? 1 [:bipush :iload_3 :ireturn])))
-(is (= false (uses-vars-ok? 1 [:iload_0 :iconst_m1 :istore_0 :iinc 1 -27 :ireturn])))
