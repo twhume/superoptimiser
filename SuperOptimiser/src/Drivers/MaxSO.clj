@@ -28,10 +28,10 @@
 
 ; The code below is a double-check for our tests: basically, does java.lang.Math pass them?
 ;(let [^DynamicClassLoader cl (new clojure.lang.DynamicClassLoader) math (.loadClass cl "java.lang.Math")]
-;  (passes? eq-tests-filter math)
+;  (check-passes eq-tests-filter {:seq-num 1 :class math})
 ;)
                                    
 
 (time 
   (doall
-        (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))
+        (superoptimise-pmap 6 class-name method-name method-signature eq-tests-filter)))
