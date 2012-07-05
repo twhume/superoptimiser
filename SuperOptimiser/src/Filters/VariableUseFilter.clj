@@ -22,13 +22,11 @@
 	    (= op :istore_2) '(2 :write)
 	    (= op :istore_3) '(3 :write)
       (= op :istore) (seq [(nth s 1) :write])
-      (= op :iinc) (seq [(nth s 1) :write])
       :else nil)))
 
 (is (= '(0 :write) (update-varmap '[:istore_0])))
 (is (= '(3 :read) (update-varmap '[:iload_3])))
 (is (= '(7 :write) (update-varmap '[:istore 7])))
-(is (= '(1 :write) (update-varmap '[:iinc 1])))
 (is (= '(12 :read) (update-varmap '[:iload 12])))
 
 (defn uses-vars-ok?
@@ -40,7 +38,7 @@
 	      (cond
 	        (empty? head) true
          
-         ; If we're reading from, or incrementing, a variable which has never been written, fail the sequence
+         ; If we're reading from, a variable which has never been written, fail the sequence
          
 	        (and (= op :iload_0) (= nil (get last-op 0))) false 
 	        (and (= op :iload_1) (= nil (get last-op 1))) false
