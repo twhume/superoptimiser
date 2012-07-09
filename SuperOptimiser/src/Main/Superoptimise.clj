@@ -2,6 +2,7 @@
 (import 'clojure.lang.Reflector)
 (use 'Main.Bytecode)
 (use 'Main.Opcodes)
+(use 'clojure.test)
 
 ; Main driver functions for the SuperOptimiser. Kept here so they don't pollute your individual SO stuff
 
@@ -11,6 +12,22 @@
   "How many arguments does the quoted Java method signature contain?"
   [s]
   (dec (- (.indexOf s ")") (.indexOf s "("))))
+
+; This macro runs a piece of code with a defined timeout; I took it from
+; http://stackoverflow.com/questions/6694530/executing-a-function-with-a-timeout
+(defmacro with-timeout [millis & body]
+    `(let [future# (future ~@body)]
+      (try
+        (.get future# ~millis java.util.concurrent.TimeUnit/MILLISECONDS)
+        (catch java.util.concurrent.TimeoutException x# 
+          (do
+            (future-cancel future#)
+            (println "cancelled a future")
+            false)))))
+
+; Unit test to check infinite loops finish and fail
+(is (= false (with-timeout 2000 (recur))))
+
 
 ; generate all 2-sequence bytecodes
 ; map each one to a class file
@@ -26,11 +43,12 @@
       (let [next-test (first remaining-tests)]
 	      (cond
 	        (empty? remaining-tests) true
-	        (not (try (next-test (:class class)) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))) false
+	        (not (try (with-timeout 2000 (next-test (:class class))) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))) false
 	        :else (recur (rest remaining-tests)))
        ))))
 
-; stick a "(do (println e)" before the false to get a log of errors - we should try and prevent these
+
+
 
 (defn superoptimise
   "Main driver function for the SuperOptimiser"
