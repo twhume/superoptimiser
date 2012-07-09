@@ -157,6 +157,16 @@
         ; check that the item we are returning has been influenced by every input variable
         (= :ireturn op) (has-influence? nv (first (:stack infl-map)))
 
+        ; Hit a branch? All bets are off
+        (or 
+          (= :ifeq op)
+          (= :ifne op)
+          (= :iflt op)
+          (= :ifgt op)
+          (= :ifge op)
+          (= :ifle op)
+          (= :goto op)) true
+
         :else (do
                 (println "Unhandled operation" op)
                 false)))))

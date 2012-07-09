@@ -206,6 +206,22 @@
     (let [cur-op (first remainder)]
       (cond
         (empty? remainder) true
+        
+        ; Found a branching instruction? All bets are off then
+        (or 
+          (= :if_icmpeq cur-op)
+          (= :if_icmpne cur-op)
+          (= :if_icmplt cur-op)
+          (= :if_icmpgt cur-op)
+          (= :if_icmpge cur-op)
+          (= :if_icmple cur-op)
+          (= :ifeq cur-op)
+          (= :ifne cur-op)
+          (= :iflt cur-op)
+          (= :ifgt cur-op)
+          (= :ifge cur-op)
+          (= :ifle cur-op)
+          (= :goto cur-op)) true
         (state-recurred? cur-state past-states) false
         :else
         (recur (rest remainder) (add-state cur-state cur-op) (cons cur-state past-states))))))
