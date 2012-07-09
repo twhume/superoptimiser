@@ -23,14 +23,9 @@
                         [:ineg :ineg]       ; Two negations get us back where we started
                         [:iconst_0 :idiv]   ; Divide by zero, never fun
                         [:iconst_0 :irem]   ; Divide by zero, never fun
-                        [:iconst_0 :pop]
-                        [:iconst_m1 :pop]
-                        [:iconst_1 :pop]
-                        [:iconst_2 :pop]
-                        [:iconst_3 :pop]
-                        [:iconst_4 :pop]
-                        [:iconst_5 :pop]
-                        [:bipush :pop]
+                        [:iconst_0 :iadd]   ; Adding zero does nothing
+                        [:iconst_1 :imul]   ; Multiplying by 1 does nothing
+                        [:iconst_1 :idiv]   ; Dividing by 1 does nothing
                         ))
 
 (defn contains-no-redundant-pairs?
@@ -96,16 +91,17 @@
 
 (defn expand-arg
   "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
-  [vars k]
+  [vars length position k]
   (cond 
     (= k :local-var) (range 0 vars)
     (= k :s-byte) (range -127 128)
     (= k :us-byte) (range 0 256)
     (= k :byte) (range 0 256)
+    (= k :branch-dest) (filter #(not(= % 0)) (map #(inc (- % position)) (range 0 length)))
     :else (seq [k])))
 
-(is (= '(0 1 2 3 4) (expand-arg 5 :local-var)))
-(is (= nil) (expand-arg 1 :dummy-keyword))
+(is (= '(0 1 2 3 4) (expand-arg 5 1 1 :local-var)))
+(is (= nil) (expand-arg 1 1 1 :dummy-keyword))
 
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
@@ -114,8 +110,11 @@
     
     (map #(hash-map :length seq-length :vars max-vars :code % )
               (apply cartesian-product
-                (map (partial expand-arg max-vars) 
+                (map-indexed (partial expand-arg max-vars seq-length) 
                      (flatten (map #(cons % (:args (opcodes %))) s)))))))
+
+(is (= '({:vars 1, :length 3, :code (:iconst_4 :goto -1 :ireturn)} {:vars 1, :length 3, :code (:iconst_4 :goto 1 :ireturn)})
+    (expand-opcodes 1 '[:iconst_4 :goto :ireturn])))
 
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
