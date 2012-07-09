@@ -33,6 +33,7 @@
     (= :iload_3 op) (new VarInsnNode 21 3)
     (= :iinc op) (new IincInsnNode (first args) (second args)) 
     (= :bipush op) (new IntInsnNode opcode (first args)) 
+    ; TODO add comparison and goto support here
     (nil? ((opcodes op) :args)) (new InsnNode opcode)
     :else nil)))
 
@@ -42,6 +43,96 @@
   (let [op (first ocs)]
     (. insnlist add (add-opcode op (rest ocs)))
     (nthrest ocs (+ 1 (count ((opcodes op) :args))))))
+
+(defn is-jump?
+  "Is the operation passed in one which triggers a jump?"
+  [op]
+  (or
+    (= op :goto)
+    (= op :if_icmpeq)
+    (= op :if_icmpne)
+    (= op :if_icmplt)
+    (= op :if_icmpge)
+    (= op :if_icmpgt)
+    (= op :if_icmple)
+    (= op :ifeq)
+    (= op :ifne)
+    (= op :iflt)
+    (= op :ifge)
+    (= op :ifgt)
+    (= op :ifle)))
+
+(defn insert-at
+  "Create a new sequence consisting of the input sequence s with an extra item i inserted at a position distance d from p"
+  [s i p d]
+  (let [jump-dest (+ p d)]
+        (concat (take jump-dest s) (list i) (nthrest s jump-dest))))
+
+(is (= '(:a :b :c :1 :d :e) (insert-at '(:a :b :c :d :e) :1 3 0)))
+(is (= '(:a :b :1 :c :d :e) (insert-at '(:a :b :c :d :e) :1 3 -1)))
+(is (= '(:a :1 :b :c :d :e) (insert-at '(:a :b :c :d :e) :1 3 -2)))
+(is (= '(:a :b :c :d :1 :e) (insert-at '(:a :b :c :d :e) :1 3 1)))
+(is (= '(:a :b :c :d :e :1) (insert-at '(:a :b :c :d :e) :1 3 2)))
+(is (= '(:1 :a :b :c :d :e) (insert-at '(:a :b :c :d :e) :1 0 0)))
+(is (= '(:a :1 :b :c :d :e) (insert-at '(:a :b :c :d :e) :1 0 1)))
+(is (= '(:a :b :1 :c :d :e) (insert-at '(:a :b :c :d :e) :1 0 2)))
+(is (= '(:a :b :c :d :1 :e) (insert-at '(:a :b :c :d :e) :1 4 0)))
+(is (= '(:a :b :c :d :e :1) (insert-at '(:a :b :c :d :e) :1 4 1)))
+(is (= '(:a :b :c :1 :d :e) (insert-at '(:a :b :c :d :e) :1 4 -1)))
+(is (= '(:a :b :1 :c :d :e) (insert-at '(:a :b :c :d :e) :1 4 -2)))
+ 
+(defn replace-at
+  "Create a new sequence consisting of the input sequence s with the item at position p replaced by i"
+  [s i p]
+  (concat (take p s) (list i) (nthrest s (inc p))))
+
+(is (= '(:1 :b :c :d :e) (replace-at '(:a :b :c :d :e) :1 0)))
+(is (= '(:a :1 :c :d :e) (replace-at '(:a :b :c :d :e) :1 1)))
+(is (= '(:a :b :1 :d :e) (replace-at '(:a :b :c :d :e) :1 2)))
+(is (= '(:a :b :c :1 :e) (replace-at '(:a :b :c :d :e) :1 3)))
+(is (= '(:a :b :c :d :1) (replace-at '(:a :b :c :d :e) :1 4)))
+
+(defn update-labelling
+  "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label"
+  [s i p d]
+  (if (> (+ p d) (+ p 1)) (replace-at (insert-at s i (+ 1 p) d) i (+ 1 p))
+    (replace-at (insert-at s i p d) i (+ 2 p))))
+
+(is (= '(:a :b :1 :c :d :e :1) (update-labelling '(:a :b :c :d :e -2) :1 4 -2)))
+(is (= '(:a :b :c :1 :d :e :1) (update-labelling '(:a :b :c :d :e -2) :1 4 -1)))
+(is (= '(:a :b :c :d :1 :e :1) (update-labelling '(:a :b :c :d :e -2) :1 4 0)))
+
+(is (= '(:1 :a :b :c :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 -2)))
+(is (= '(:a :1 :b :c :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 -1)))
+(is (= '(:a :b :1 :c :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 0)))
+(is (= '(:a :b :c :1 :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 1)))
+(is (= '(:a :b :c :1 :d :1 :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 2)))
+
+(is (= '(:1 :a :1 :b :c :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 0)))
+(is (= '(:a :1 :1 :b :c :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 1)))
+(is (= '(:a :1 :b :1 :c :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 2)))
+(is (= '(:a :1 :b :c :1 :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 3)))
+
+(defn add-labels
+  "Takes a list of opcodes and arguments and adds label entries to correspond to branch destinations"
+  [a]
+  (loop [input a output a jump-num 0 pos 0]
+    (let [cur (first input)]
+      (cond
+        (empty? input) output
+        (is-jump? cur) (let [label-key (keyword (str "label_" jump-num))]
+                         (recur (nthrest input 2)
+                              (update-labelling output label-key pos (second input))
+                              (inc jump-num)
+                              (inc pos)))
+        :else (recur (rest input) output jump-num (inc pos))))))
+  ; loop through the list
+  ; if we have a branch instruction, insert a label for the branch at the appropriate place, insert a reference to this label, and continue
+  ; otherwise move to the next instruction
+
+(is (= '(:label_0 :iload_0 :goto :label_0 :ireturn) (add-labels '(:iload_0 :goto -1 :ireturn))))
+(is (= '(:iload_0 :goto :label_0 :label_0 :istore_1 :ireturn) (add-labels '(:iload_0 :goto 1 :istore_1 :ireturn))))
+(is (= '(:iload_0 :goto :label_0 :istore_1 :label_0 :ireturn) (add-labels '(:iload_0 :goto 2 :istore_1 :ireturn))))
 
 (defn get-instructions
   "Turns the supplied list of opcodes and arguments into an InsnList"
