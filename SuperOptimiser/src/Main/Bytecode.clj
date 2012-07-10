@@ -4,7 +4,7 @@
 (import '(clojure.lang DynamicClassLoader))
 (import '(java.io FileOutputStream))
 (import '(org.objectweb.asm ClassWriter Opcodes))
-(import '(org.objectweb.asm.tree  AbstractInsnNode VarInsnNode InsnNode IincInsnNode IntInsnNode ClassNode MethodNode InsnList))
+(import '(org.objectweb.asm.tree  AbstractInsnNode VarInsnNode InsnNode IincInsnNode JumpInsnNode IntInsnNode ClassNode MethodNode InsnList LabelNode))
 
 ; This package handles the creation of Java class files.
 
@@ -14,35 +14,6 @@
   (new clojure.lang.DynamicClassLoader))
 
 (def classloader (atom (new clojure.lang.DynamicClassLoader)))
-
-(defn add-opcode
-  "Creates a child of an AbstractInsNode and returns it"
-  [op & argseq]
-  (let [args (flatten argseq)
-        opcode ((opcodes op) :opcode)]
-  (cond
-    (= :istore op) (new VarInsnNode opcode (first args))
-    (= :istore_0 op) (new VarInsnNode 54 0)
-    (= :istore_1 op) (new VarInsnNode 54 1)
-    (= :istore_2 op) (new VarInsnNode 54 2)
-    (= :istore_3 op) (new VarInsnNode 54 3)
-    (= :iload op) (new VarInsnNode opcode (first args))
-    (= :iload_0 op) (new VarInsnNode 21 0)
-    (= :iload_1 op) (new VarInsnNode 21 1)
-    (= :iload_2 op) (new VarInsnNode 21 2)
-    (= :iload_3 op) (new VarInsnNode 21 3)
-    (= :iinc op) (new IincInsnNode (first args) (second args)) 
-    (= :bipush op) (new IntInsnNode opcode (first args)) 
-    ; TODO add comparison and goto support here
-    (nil? ((opcodes op) :args)) (new InsnNode opcode)
-    :else nil)))
-
-(defn add-opcode-and-args
-  "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
-  [insnlist ocs]
-  (let [op (first ocs)]
-    (. insnlist add (add-opcode op (rest ocs)))
-    (nthrest ocs (+ 1 (count ((opcodes op) :args))))))
 
 (defn is-jump?
   "Is the operation passed in one which triggers a jump?"
@@ -61,6 +32,42 @@
     (= op :ifge)
     (= op :ifgt)
     (= op :ifle)))
+
+(defn add-opcode
+  "Creates a child of an AbstractInsNode and returns it"
+  [op labels & argseq]
+  (let [args (flatten argseq)
+        opcode ((opcodes op) :opcode)]
+  (cond
+    (= :istore op) (new VarInsnNode opcode (first args))
+    (= :istore_0 op) (new VarInsnNode 54 0)
+    (= :istore_1 op) (new VarInsnNode 54 1)
+    (= :istore_2 op) (new VarInsnNode 54 2)
+    (= :istore_3 op) (new VarInsnNode 54 3)
+    (= :iload op) (new VarInsnNode opcode (first args))
+    (= :iload_0 op) (new VarInsnNode 21 0)
+    (= :iload_1 op) (new VarInsnNode 21 1)
+    (= :iload_2 op) (new VarInsnNode 21 2)
+    (= :iload_3 op) (new VarInsnNode 21 3)
+    (= :iinc op) (new IincInsnNode (first args) (second args)) 
+    (= :bipush op) (new IntInsnNode opcode (first args)) 
+    
+    ; Look up any label node from the labels map passed in
+    (re-find #"^label_" (name op)) (get labels op) 
+    
+    ; TODO add comparison and goto support here
+    
+    (is-jump? op) (new JumpInsnNode opcode ((first args) labels))
+    
+    (nil? ((opcodes op) :args)) (new InsnNode opcode)
+    :else nil)))
+
+(defn add-opcode-and-args
+  "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
+  [insnlist ocs labels]
+  (let [op (first ocs)]
+    (. insnlist add (add-opcode op labels (rest ocs)))
+    (nthrest ocs (+ 1 (count ((opcodes op) :args))))))
 
 (defn insert-at
   "Create a new sequence consisting of the input sequence s with an extra item i inserted at a position distance d from p"
@@ -134,13 +141,20 @@
 (is (= '(:iload_0 :goto :label_0 :label_0 :istore_1 :ireturn) (add-labels '(:iload_0 :goto 1 :istore_1 :ireturn))))
 (is (= '(:iload_0 :goto :label_0 :istore_1 :label_0 :ireturn) (add-labels '(:iload_0 :goto 2 :istore_1 :ireturn))))
 
+(defn make-labels-map
+  "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
+  [o]
+  (into {} (map #(assoc {} % (new LabelNode))
+                (distinct
+                  (filter #(re-find #"^label_" (name %)) o)))))
+
 (defn get-instructions
   "Turns the supplied list of opcodes and arguments into an InsnList"
   [a]
-  (let [l (new InsnList)]
-    (loop [codes a]
+  (let [l (new InsnList) labelled-opcodes (add-labels a) labels-map (make-labels-map labelled-opcodes)]
+    (loop [codes labelled-opcodes]
       (if (empty? codes) l
-        (recur (add-opcode-and-args l codes))))))
+        (recur (add-opcode-and-args l codes labels-map))))))
 
 (is (= 2 (. (get-instructions '(:iload_0 :ireturn)) size)))
 (is (= 1 (. (get-instructions '(:ireturn)) size)))
@@ -150,12 +164,10 @@
    :length, :vars and :code, containing the number of opcodes, the max. number of local variables and a list of opcodes and arguments"
 
   [code className methodName methodSig]
-  
   (let [cn (new ClassNode)
         cw (new ClassWriter ClassWriter/COMPUTE_MAXS)
         mn (new MethodNode (+ Opcodes/ACC_PUBLIC Opcodes/ACC_STATIC) methodName methodSig nil nil)
         ins (get-instructions code)]
-    
     (set! (. cn version) Opcodes/V1_5)
     (set! (. cn access) Opcodes/ACC_PUBLIC)
     (set! (. cn name) className)

@@ -83,14 +83,25 @@
               :ishl {:opcode 120 :opstack-needs 2 :opstack-effect -1}
               :ishr {:opcode 122 :opstack-needs 2 :opstack-effect -1}
 ;              :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
-               
-              ; Commented out as these are just shortcuts for istore
-              
+                             
               :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
               :istore_1 {:opcode 60 :opstack-needs 1 :opstack-effect -1}
               :istore_2 {:opcode 61 :opstack-needs 1 :opstack-effect -1}
               :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
               :isub {:opcode 100 :opstack-needs 2 :opstack-effect -1}
               :iushr {:opcode 124 :opstack-needs 2 :opstack-effect -1}
-              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}})
+              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}
+  
+              ; These are not real JVM opcodes, but virtual ones used for labels and jumps with ASM
+  
+						  :label_0 {:opcode 0}
+						  :label_1 {:opcode 0}
+						  :label_2 {:opcode 0}
+						  :label_3 {:opcode 0}
+						  :label_4 {:opcode 0}
+						  :label_5 {:opcode 0}
+						  :label_6 {:opcode 0}
+						  :label_7 {:opcode 0}}
+					  
+  )
 
