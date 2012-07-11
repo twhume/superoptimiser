@@ -51,23 +51,25 @@
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
   [n s]
   (and
+    true
     (finishes-ireturn? s)
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
-    (contains-no-redundant-pairs? s)
-    (retains-influence? n s)
-    (no-redundancy? n s)
+;    (contains-no-redundant-pairs? s)
+;    (retains-influence? n s)
+;    (no-redundancy? n s)
 ))
 
 (defn is-fertile?
   "Master fertility filter: returns true if any children of this opcode sequence s with n arguments may be valid"
   [n s]
   (and
+    true
     (no-ireturn? s)
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
-    (contains-no-redundant-pairs? s)
-    (no-redundancy? n s)
+;    (contains-no-redundant-pairs? s)
+;    (no-redundancy? n s)
 ))
 
 (defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s %) (keys opcodes))))

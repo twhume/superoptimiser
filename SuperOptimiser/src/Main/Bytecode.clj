@@ -33,41 +33,54 @@
     (= op :ifgt)
     (= op :ifle)))
 
+(defn is-a-label?
+  "Is the keyword passed in a label?"
+  [op]
+  (if (and
+        (= clojure.lang.Keyword (type op))
+        (re-find #"^label_" (name op)))
+    true
+    false))
+
 (defn add-opcode
   "Creates a child of an AbstractInsNode and returns it"
   [op labels & argseq]
-  (let [args (flatten argseq)
-        opcode ((opcodes op) :opcode)]
+  (let [args (flatten argseq)]
   (cond
-    (= :istore op) (new VarInsnNode opcode (first args))
+    (= :istore op) (new VarInsnNode 54 (first args))
     (= :istore_0 op) (new VarInsnNode 54 0)
     (= :istore_1 op) (new VarInsnNode 54 1)
     (= :istore_2 op) (new VarInsnNode 54 2)
     (= :istore_3 op) (new VarInsnNode 54 3)
-    (= :iload op) (new VarInsnNode opcode (first args))
+    (= :iload op) (new VarInsnNode 21 (first args))
     (= :iload_0 op) (new VarInsnNode 21 0)
     (= :iload_1 op) (new VarInsnNode 21 1)
     (= :iload_2 op) (new VarInsnNode 21 2)
     (= :iload_3 op) (new VarInsnNode 21 3)
     (= :iinc op) (new IincInsnNode (first args) (second args)) 
-    (= :bipush op) (new IntInsnNode opcode (first args)) 
+    (= :bipush op) (new IntInsnNode 16 (first args)) 
     
     ; Look up any label node from the labels map passed in
-    (re-find #"^label_" (name op)) (get labels op) 
+    (is-a-label? op) (get labels op) 
     
     ; TODO add comparison and goto support here
     
-    (is-jump? op) (new JumpInsnNode opcode ((first args) labels))
+    (is-jump? op) (new JumpInsnNode ((opcodes op) :opcode) ((first args) labels))
     
-    (nil? ((opcodes op) :args)) (new InsnNode opcode)
+    (nil? ((opcodes op) :args)) (new InsnNode ((opcodes op) :opcode))
     :else nil)))
 
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
   [insnlist ocs labels]
-  (let [op (first ocs)]
+  (let [op (first ocs) num-args (if (is-a-label? op) 0 (count ((opcodes op) :args)))]
     (. insnlist add (add-opcode op labels (rest ocs)))
-    (nthrest ocs (+ 1 (count ((opcodes op) :args))))))
+    (nthrest ocs (+ 1 num-args))))
+
+(defn jump-dest
+  "Calculate the position of the jump destination in a sequence of keywords and arguments"
+  [s p d]
+  (+ p d))
 
 (defn insert-at
   "Create a new sequence consisting of the input sequence s with an extra item i inserted at a position distance d from p"
@@ -140,21 +153,28 @@
 (is (= '(:label_0 :iload_0 :goto :label_0 :ireturn) (add-labels '(:iload_0 :goto -1 :ireturn))))
 (is (= '(:iload_0 :goto :label_0 :label_0 :istore_1 :ireturn) (add-labels '(:iload_0 :goto 1 :istore_1 :ireturn))))
 (is (= '(:iload_0 :goto :label_0 :istore_1 :label_0 :ireturn) (add-labels '(:iload_0 :goto 2 :istore_1 :ireturn))))
+(is (= '(:label_0 :bipush 1 :goto :label_0 :ireturn) (add-labels '(:bipush 1 :goto -1 :ireturn))))
 
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
   [o]
   (into {} (map #(assoc {} % (new LabelNode))
                 (distinct
-                  (filter #(re-find #"^label_" (name %)) o)))))
+                  (filter is-a-label? o)))))
 
 (defn get-instructions
   "Turns the supplied list of opcodes and arguments into an InsnList"
   [a]
-  (let [l (new InsnList) labelled-opcodes (add-labels a) labels-map (make-labels-map labelled-opcodes)]
-    (loop [codes labelled-opcodes]
-      (if (empty? codes) l
-        (recur (add-opcode-and-args l codes labels-map))))))
+  (try
+	  (let [l (new InsnList) labelled-opcodes (add-labels a) labels-map (make-labels-map labelled-opcodes)]
+	    (loop [codes labelled-opcodes]
+	      (if (empty? codes) l
+	        (recur (add-opcode-and-args l codes labels-map)))))
+   (catch Exception e (do
+                        (println "Exception " e a)
+                        (throw e))))
+   
+   )
 
 (is (= 2 (. (get-instructions '(:iload_0 :ireturn)) size)))
 (is (= 1 (. (get-instructions '(:ireturn)) size)))
