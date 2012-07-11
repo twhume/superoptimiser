@@ -7,18 +7,18 @@
 (defn no-ireturn?
   "Does the supplied sequence not include an ireturn?"
   [l]
-  (nil? (some #{:ireturn} l)))
+  (nil? (some #(= :ireturn (first %)) l)))
 
 ; Unit tests
-(is (= true (no-ireturn? [:ixor :iushr])))
-(is (= false (no-ireturn? [:ixor :ireturn ])))
+(is (= true (no-ireturn? '((:ixor) (:iushr)))))
+(is (= false (no-ireturn? '((:ixor) (:ireturn)))))
 
 (defn finishes-ireturn?
   "Does the supplied sequence finish with an ireturn?"
   [l]
-  (= :ireturn (last l)))
+  (= :ireturn (first (last l))))
 
 ; Unit tests
-(is (= false (finishes-ireturn? [:ixor :iushr])))
-(is (= false (finishes-ireturn? [:ireturn :iushr])))
-(is (= true (finishes-ireturn? [:ixor :ireturn ])))
+(is (= false (finishes-ireturn? '((:ixor) (:iushr)))))
+(is (= false (finishes-ireturn? '((:ireturn) (:iushr)))))
+(is (= true (finishes-ireturn? '((:ixor) (:ireturn)))))
