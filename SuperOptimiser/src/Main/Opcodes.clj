@@ -92,30 +92,28 @@
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore :ixor])))
 
 (defn expand-arg
-  "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
-  [vars length position k]
-  (cond 
-    (= k :local-var) (range 0 vars)
-    (= k :s-byte) (range -127 128)
-    (= k :us-byte) (range 0 256)
-    (= k :byte) (range 0 256)
-    (= k :branch-dest) (filter #(not(= % 0)) (map #(inc (- % position)) (range 0 length)))
-    :else (seq [k])))
+  "Returns a sequence of bytes appropriate for the (op and arguments) passed in in kand number of local variables"
+  [vars length position op_args]
+  (let [op (first op_args) arg (second op_args)]
+    (cond 
+      (= arg :local-var) (map #(list op %) (range 0 vars))
+      (= arg :s-byte) (map #(list op %) (range -127 128))
+      (= arg :us-byte) (map #(list op %) (range 0 256))
+      (= arg :byte) (map #(list op %) (range 0 256))
+      (= arg :branch-dest) (map #(list op %) (filter #(not(= % 0)) (map #(- % position) (range 0 length))))
+      :else (seq [(seq [op])]))))
 
-(is (= '(0 1 2 3 4) (expand-arg 5 1 1 :local-var)))
-(is (= nil) (expand-arg 1 1 1 :dummy-keyword))
 
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
   [m s]
   (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
-    
     (map #(hash-map :length seq-length :vars max-vars :code % )
               (apply cartesian-product
                 (map-indexed (partial expand-arg max-vars seq-length) 
-                     (flatten (map #(cons % (:args (opcodes %))) s)))))))
+                     (map #(cons % (:args (opcodes %))) s))))))
 
-(is (= '({:vars 1, :length 3, :code (:iconst_4 :goto -1 :ireturn)} {:vars 1, :length 3, :code (:iconst_4 :goto 1 :ireturn)})
+(is (= '({:vars 1, :length 3, :code ((:iconst_4) (:goto -1) (:ireturn))} {:vars 1, :length 3, :code ((:iconst_4) (:goto 1) (:ireturn))})
     (expand-opcodes 1 '[:iconst_4 :goto :ireturn])))
 
 (defn expanded-numbered-opcode-sequence
