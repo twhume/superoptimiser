@@ -34,7 +34,7 @@
   [nv l]
   (let [initial-hash (into {} (map #(assoc {} (identity %) :write) (range 0 nv)))]
     (loop [head l last-op initial-hash]
-      (let [op (first head) vm-update (update-varmap head)]
+      (let [op_args (first head) op (first op_args) vm-update (update-varmap op_args)]
 	      (cond
 	        (empty? head) true
          
@@ -60,15 +60,15 @@
 	        :else (if (= nil vm-update) (recur (rest head) last-op)
                  (recur (rest head) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
 
-(is (= true (uses-vars-ok? 0 [:ixor])))
-(is (= false (uses-vars-ok? 0 [:iload_0])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0])))
-(is (= false (uses-vars-ok? 0 [:istore_1 :iload_0])))
-(is (= false (uses-vars-ok? 0 [:istore_0 :istore_0])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :istore_1])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0 :istore_0])))
-(is (= true (uses-vars-ok? 0 [:istore_0 :iload_0 :istore_0 :iload_0 :iload_0])))
-(is (= false (uses-vars-ok? 0 [:istore_0 :iload_1 :istore_0])))
-(is (= true (uses-vars-ok? 1 [:iload_0])))
-(is (= false (uses-vars-ok? 1 [:bipush :iload_3 :ireturn])))
+(is (= true (uses-vars-ok? 0 '((:ixor)))))
+(is (= false (uses-vars-ok? 0 '((:iload_0)))))
+(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0)))))
+(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 '((:istore_1) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 '((:istore_0) (:istore_0)))))
+(is (= true (uses-vars-ok? 0 '((:istore_0) (:istore_1)))))
+(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0) (:istore_0)))))
+(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0) (:istore_0) (:iload_0) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 '((:istore_0) (:iload_1) (:istore_0)))))
+(is (= true (uses-vars-ok? 1 '((:iload_0)))))
+(is (= false (uses-vars-ok? 1 '((:bipush) (:iload_3) (:ireturn)))))
