@@ -34,11 +34,9 @@
     (= op :ifle)))
 
 (defn is-a-label?
-  "Is the keyword passed in a label?"
+  "Is the keyword in the sequence passed in a label?"
   [op]
-  (if (and
-        (= clojure.lang.Keyword (type op))
-        (re-find #"^label_" (name op)))
+  (if (re-find #"^label_" (name (first op)))
     true
     false))
 
@@ -158,6 +156,8 @@
   (into {} (map #(assoc {} % (new LabelNode))
                 (distinct
                   (filter is-a-label? o)))))
+
+(is (= 1 (count (make-labels-map (add-labels '((:iload_0) (:goto -1) (:ireturn)))))))
 
 (defn get-instructions
   "Turns the supplied list of opcodes and arguments into an InsnList"
