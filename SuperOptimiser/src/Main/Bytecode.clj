@@ -105,6 +105,7 @@
 (defn update-labelling
   "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label, given that there are j jumps landing before the current position"
   [s i p d]
+  (println "update-labelling" s i p d)
   (if (>= d 1) (replace-at (insert-at s (list i) p d) i p)
     (replace-at (insert-at s (list i) p d) i (+ 1 p))))
 
@@ -129,7 +130,9 @@
                          (recur (rest input)
                               (update-labelling output label-key pos arg)
                               (inc jump-num)
-                              (if (>= arg 1) (+ 1 pos) (+ 2 pos))))
+                              (if (>= arg 1) (+ 1 pos) (+ 2 pos))
+;                              (inc pos)
+))
         :else (recur (rest input) output jump-num (inc pos))))))
   ; loop through the list
   ; if we have a branch instruction, insert a label for the branch at the appropriate place, insert a reference to this label, and continue
