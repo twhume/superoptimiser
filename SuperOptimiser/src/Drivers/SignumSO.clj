@@ -25,4 +25,4 @@
 
 (def eq-tests-filter [less-than-minus-one-even? greater-than-one-even? one? minus-one? is-zero? greater-than-one? less-than-minus-one?])
 
-(time (doall (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))
+(time (doall (superoptimise-pmap 4 class-name method-name method-signature eq-tests-filter)))
