@@ -31,21 +31,22 @@
 (defn contains-no-redundant-pairs?
   "Does the supplied sequence contain any sequences of operations which are redundant?"
   [l]
-  (loop [pairs redundant-pairs]
-    (if (empty? pairs) true
-      (do
-        (let [cur-pair (first pairs) idx-first (.indexOf l (first cur-pair)) idx-next (inc idx-first)]
-        (if
-          (and
-            (> idx-first -1)
-            (< idx-first (dec (count l)))
-            (= (second cur-pair) (nth l idx-next))) false
-          (recur (rest pairs))))))))
+  (let [opcodes (map first l)]
+    (loop [pairs redundant-pairs]
+      (if (empty? pairs) true
+        (do
+          (let [cur-pair (first pairs) idx-first (.indexOf opcodes (first cur-pair)) idx-next (inc idx-first)]
+            (if
+              (and
+                (> idx-first -1)
+                (< idx-first (dec (count opcodes)))
+                (= (second cur-pair) (nth opcodes idx-next))) false
+              (recur (rest pairs)))))))))
 
-(is (= false (contains-no-redundant-pairs? '[:ixor :swap :swap])))
-(is (= false (contains-no-redundant-pairs? '[:swap :swap])))
-(is (= false (contains-no-redundant-pairs? '[:swap :swap :ixor])))
-(is (= true (contains-no-redundant-pairs? '[:ixor :swap :ixor :swap])))
+(is (= false (contains-no-redundant-pairs? '((:ixor) (:swap) (:swap)))))
+(is (= false (contains-no-redundant-pairs? '((:swap) (:swap)))))
+(is (= false (contains-no-redundant-pairs? '((:swap) (:swap) (:ixor)))))
+(is (= true (contains-no-redundant-pairs? '((:ixor) (:swap) (:ixor) (:swap)))))
 
 (defn is-valid?
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
@@ -55,9 +56,9 @@
     (finishes-ireturn? s)
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
-;    (contains-no-redundant-pairs? s)
-;    (retains-influence? n s)
-;    (no-redundancy? n s)
+    (contains-no-redundant-pairs? s)
+    (retains-influence? n s)
+    (no-redundancy? n s)
 ))
 
 (defn is-fertile?
@@ -68,8 +69,8 @@
     (no-ireturn? s)
     (uses-vars-ok? n s)
     (uses-operand-stack-ok? s)
-;    (contains-no-redundant-pairs? s)
-;    (no-redundancy? n s)
+    (contains-no-redundant-pairs? s)
+    (no-redundancy? n s)
 ))
 
 (defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
@@ -91,18 +92,24 @@
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore])))
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore :ixor])))
 
-(defn expand-arg
-  "Returns a sequence of bytes appropriate for the (op and arguments) passed in in kand number of local variables"
-  [vars length position op_args]
-  (let [op (first op_args) arg (second op_args)]
-    (cond 
-      (= arg :local-var) (map #(list op %) (range 0 vars))
-      (= arg :s-byte) (map #(list op %) (range -127 128))
-      (= arg :us-byte) (map #(list op %) (range 0 256))
-      (= arg :byte) (map #(list op %) (range 0 256))
-      (= arg :branch-dest) (map #(list op %) (filter #(not(= % 0)) (map #(- % position) (range 0 length))))
-      :else (seq [(seq [op])]))))
+(defn expand-single-arg
+  "Expand a single argument"
+  [vars length position op arg]
+  (cond 
+        (= arg :local-var) (range 0 vars)
+        (= arg :s-byte) (range -127 128)
+        (= arg :us-byte) (range 0 256)
+        (= arg :byte) (range 0 256)
+        (= arg :branch-dest)  (filter #(not(= % 0)) (map #(- % position) (range 0 length)))
+        :else (seq [(seq [op])])))
 
+(defn expand-arg
+  "Returns a sequence of bytes appropriate for the (op and arguments) passed in in k and number of local variables"
+  [vars length position op_args]
+  (let [op (first op_args) args (rest op_args)]
+    (map #(cons op %)
+         (apply cartesian-product
+                (map (partial expand-single-arg vars length position op) args)))))
 
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"

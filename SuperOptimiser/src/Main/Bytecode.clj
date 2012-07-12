@@ -105,8 +105,7 @@
 (defn update-labelling
   "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label"
   [s i p d]
-  ; if d >= 1 surely?
-  (if (>= (+ p d) (+ p 1)) (replace-at (insert-at s (list i) p d) i p)
+  (if (>= d 1) (replace-at (insert-at s (list i) p d) i p)
     (replace-at (insert-at s (list i) p d) i (+ 1 p))))
 
 (is (= '((:1) (:a) (:b) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -4)))
@@ -145,7 +144,7 @@
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
   [o]
-  (into {} (map #(assoc {} % (new LabelNode))
+  (into {} (map #(assoc {} (first %) (new LabelNode))
                 (distinct
                   (filter is-a-label? o)))))
 
@@ -165,6 +164,7 @@
    
    )
 
+(is (= 4 (. (get-instructions '((:iload_0) (:goto -1) (:ireturn))) size)))
 (is (= 2 (. (get-instructions '((:iload_0) (:ireturn))) size)))
 (is (= 1 (. (get-instructions '((:ireturn))) size)))
 
