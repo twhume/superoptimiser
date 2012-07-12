@@ -88,61 +88,58 @@
   (let [jump-dest (+ p d)]
         (concat (take jump-dest s) (list i) (nthrest s jump-dest))))
 
-(is (= '(:a :b :c :1 :d :e) (insert-at '(:a :b :c :d :e) :1 3 0)))
-(is (= '(:a :b :1 :c :d :e) (insert-at '(:a :b :c :d :e) :1 3 -1)))
-(is (= '(:a :1 :b :c :d :e) (insert-at '(:a :b :c :d :e) :1 3 -2)))
-(is (= '(:a :b :c :d :1 :e) (insert-at '(:a :b :c :d :e) :1 3 1)))
-(is (= '(:a :b :c :d :e :1) (insert-at '(:a :b :c :d :e) :1 3 2)))
-(is (= '(:1 :a :b :c :d :e) (insert-at '(:a :b :c :d :e) :1 0 0)))
-(is (= '(:a :1 :b :c :d :e) (insert-at '(:a :b :c :d :e) :1 0 1)))
-(is (= '(:a :b :1 :c :d :e) (insert-at '(:a :b :c :d :e) :1 0 2)))
-(is (= '(:a :b :c :d :1 :e) (insert-at '(:a :b :c :d :e) :1 4 0)))
-(is (= '(:a :b :c :d :e :1) (insert-at '(:a :b :c :d :e) :1 4 1)))
-(is (= '(:a :b :c :1 :d :e) (insert-at '(:a :b :c :d :e) :1 4 -1)))
-(is (= '(:a :b :1 :c :d :e) (insert-at '(:a :b :c :d :e) :1 4 -2)))
+(is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 0)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 -1)))
+(is (= '((:a) (:1) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 -2)))
+(is (= '((:a) (:b) (:c) (:d) (:1) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 1)))
+(is (= '((:a) (:b) (:c) (:d) (:e) (:1)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 2)))
+(is (= '((:1) (:a) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0 0)))
+(is (= '((:a) (:1) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0 1)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0 2)))
+(is (= '((:a) (:b) (:c) (:d) (:1) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 0)))
+(is (= '((:a) (:b) (:c) (:d) (:e) (:1)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 1)))
+(is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 -1)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 -2)))
  
 (defn replace-at
-  "Create a new sequence consisting of the input sequence s with the item at position p replaced by i"
+  "Create a new sequence consisting of the input sequence s with the item at position p having its argument replaced by i"
   [s i p]
-  (concat (take p s) (list i) (nthrest s (inc p))))
+  (concat (take p s) (list (list (first (nth s p)) i)) (nthrest s (inc p))))
 
-(is (= '(:1 :b :c :d :e) (replace-at '(:a :b :c :d :e) :1 0)))
-(is (= '(:a :1 :c :d :e) (replace-at '(:a :b :c :d :e) :1 1)))
-(is (= '(:a :b :1 :d :e) (replace-at '(:a :b :c :d :e) :1 2)))
-(is (= '(:a :b :c :1 :e) (replace-at '(:a :b :c :d :e) :1 3)))
-(is (= '(:a :b :c :d :1) (replace-at '(:a :b :c :d :e) :1 4)))
+(is (= '((:a :1) (:b) (:c) (:d) (:e)) (replace-at '((:a :0) (:b) (:c) (:d) (:e)) :1 0)))
+(is (= '((:a) (:b :1) (:c) (:d) (:e)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 1)))
+(is (= '((:a) (:b) (:c :1) (:d) (:e)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 2)))
+(is (= '((:a) (:b) (:c) (:d :1) (:e)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 3)))
+(is (= '((:a) (:b) (:c) (:d) (:e :1)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 4)))
 
 (defn update-labelling
   "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label"
   [s i p d]
-  (if (> (+ p d) (+ p 1)) (replace-at (insert-at s i (+ 1 p) d) i (+ 1 p))
-    (replace-at (insert-at s i p d) i (+ 2 p))))
+  ; if d >= 1 surely?
+  (if (>= (+ p d) (+ p 1)) (replace-at (insert-at s (list i) p d) i p)
+    (replace-at (insert-at s (list i) p d) i (+ 1 p))))
 
-(is (= '(:a :b :1 :c :d :e :1) (update-labelling '(:a :b :c :d :e -2) :1 4 -2)))
-(is (= '(:a :b :c :1 :d :e :1) (update-labelling '(:a :b :c :d :e -2) :1 4 -1)))
-(is (= '(:a :b :c :d :1 :e :1) (update-labelling '(:a :b :c :d :e -2) :1 4 0)))
+(is (= '((:1) (:a) (:b) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -4)))
+(is (= '((:a) (:1) (:b) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -3)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -2)))
+(is (= '((:a) (:b) (:c) (:1) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -1)))
 
-(is (= '(:1 :a :b :c :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 -2)))
-(is (= '(:a :1 :b :c :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 -1)))
-(is (= '(:a :b :1 :c :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 0)))
-(is (= '(:a :b :c :1 :1 :d :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 1)))
-(is (= '(:a :b :c :1 :d :1 :e) (update-labelling '(:a :b :c -2 :d :e) :1 2 2)))
+(is (= '((:a :1) (:1) (:b) (:c) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 1)))
+(is (= '((:a :1) (:b) (:1) (:c) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 2)))
+(is (= '((:a :1) (:b) (:c) (:1) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 3)))
+(is (= '((:a :1) (:b) (:c) (:d) (:1) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 4)))
 
-(is (= '(:1 :a :1 :b :c :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 0)))
-(is (= '(:a :1 :1 :b :c :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 1)))
-(is (= '(:a :1 :b :1 :c :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 2)))
-(is (= '(:a :1 :b :c :1 :d :e) (update-labelling '(:a 1 :b :c :d :e) :1 0 3)))
 
 (defn add-labels
   "Takes a list of opcodes and arguments and adds label entries to correspond to branch destinations"
   [a]
   (loop [input a output a jump-num 0 pos 0]
-    (let [cur (first input)]
+    (let [cur (first input) op (first cur) arg (second cur)]
       (cond
         (empty? input) output
-        (is-jump? cur) (let [label-key (keyword (str "label_" jump-num))]
-                         (recur (nthrest input 2)
-                              (update-labelling output label-key pos (second input))
+        (is-jump? op) (let [label-key (keyword (str "label_" jump-num))]
+                         (recur (rest input)
+                              (update-labelling output label-key pos arg)
                               (inc jump-num)
                               (inc pos)))
         :else (recur (rest input) output jump-num (inc pos))))))
@@ -150,10 +147,10 @@
   ; if we have a branch instruction, insert a label for the branch at the appropriate place, insert a reference to this label, and continue
   ; otherwise move to the next instruction
 
-(is (= '(:label_0 :iload_0 :goto :label_0 :ireturn) (add-labels '(:iload_0 :goto -1 :ireturn))))
-(is (= '(:iload_0 :goto :label_0 :label_0 :istore_1 :ireturn) (add-labels '(:iload_0 :goto 1 :istore_1 :ireturn))))
-(is (= '(:iload_0 :goto :label_0 :istore_1 :label_0 :ireturn) (add-labels '(:iload_0 :goto 2 :istore_1 :ireturn))))
-(is (= '(:label_0 :bipush 1 :goto :label_0 :ireturn) (add-labels '(:bipush 1 :goto -1 :ireturn))))
+(is (= '((:label_0) (:iload_0) (:goto :label_0) (:ireturn)) (add-labels '((:iload_0) (:goto -1) (:ireturn)))))
+(is (= '((:iload_0) (:goto :label_0) (:label_0) (:istore_1) (:ireturn)) (add-labels '((:iload_0) (:goto 1) (:istore_1) (:ireturn)))))
+(is (= '((:iload_0) (:goto :label_0) (:istore_1) (:label_0) (:ireturn)) (add-labels '((:iload_0) (:goto 2) (:istore_1) (:ireturn)))))
+(is (= '((:label_0) (:bipush 1) (:goto :label_0) (:ireturn)) (add-labels '((:bipush 1) (:goto -1) (:ireturn)))))
 
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
@@ -176,8 +173,8 @@
    
    )
 
-(is (= 2 (. (get-instructions '(:iload_0 :ireturn)) size)))
-(is (= 1 (. (get-instructions '(:ireturn)) size)))
+(is (= 2 (. (get-instructions '((:iload_0) (:ireturn))) size)))
+(is (= 1 (. (get-instructions '((:ireturn))) size)))
 
 (defn get-class-bytes
   "Creates a Java Class from the supplied data, returns an array of bytes representing that class. Input should be a map containing keys
