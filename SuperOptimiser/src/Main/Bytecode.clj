@@ -36,7 +36,7 @@
 (defn is-a-label?
   "Is the keyword in the sequence passed in a label?"
   [op]
-  (if (re-find #"^label_" (name (first op)))
+  (if (re-find #"^label_" (name op))
     true
     false))
 
@@ -60,9 +60,6 @@
     
     ; Look up any label node from the labels map passed in
     (is-a-label? op) (get labels op) 
-    
-    ; TODO add comparison and goto support here
-    
     (is-jump? op) (new JumpInsnNode ((opcodes op) :opcode) ((first args) labels))
     
     (nil? ((opcodes op) :args)) (new InsnNode ((opcodes op) :opcode))
@@ -71,14 +68,9 @@
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
   [insnlist ocs labels]
-  (let [op (first ocs) num-args (if (is-a-label? op) 0 (count ((opcodes op) :args)))]
-    (. insnlist add (add-opcode op labels (rest ocs)))
-    (nthrest ocs (+ 1 num-args))))
-
-(defn jump-dest
-  "Calculate the position of the jump destination in a sequence of keywords and arguments"
-  [s p d]
-  (+ p d))
+  (let [op-tuple (first ocs) op (first op-tuple) num-args (if (is-a-label? op) 0 (count ((opcodes op) :args)))]
+    (. insnlist add (add-opcode op labels (rest op-tuple)))
+    (rest ocs )))
 
 (defn insert-at
   "Create a new sequence consisting of the input sequence s with an extra item i inserted at a position distance d from p"
@@ -155,7 +147,7 @@
   [o]
   (into {} (map #(assoc {} % (new LabelNode))
                 (distinct
-                  (filter is-a-label? o)))))
+                  (filter is-a-label? (flatten o))))))
 
 (is (= 1 (count (make-labels-map (add-labels '((:iload_0) (:goto -1) (:ireturn)))))))
 
