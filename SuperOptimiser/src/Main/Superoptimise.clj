@@ -15,18 +15,18 @@
 
 ; This macro runs a piece of code with a defined timeout; I took it from
 ; http://stackoverflow.com/questions/6694530/executing-a-function-with-a-timeout
-(defmacro with-timeout [millis & body]
+(defmacro with-timeout [millis opcodes & body]
     `(let [future# (future ~@body)]
       (try
         (.get future# ~millis java.util.concurrent.TimeUnit/MILLISECONDS)
         (catch java.util.concurrent.TimeoutException x# 
           (do
+            (println "Terminating" ~opcodes)
             (future-cancel future#)
-            (println "cancelled a future")
             false)))))
 
 ; Unit test to check infinite loops finish and fail
-(is (= false (with-timeout 2000 (recur))))
+(is (= false (with-timeout 2000 '() (recur))))
 
 
 ; generate all 2-sequence bytecodes
@@ -43,7 +43,7 @@
       (let [next-test (first remaining-tests)]
 	      (cond
 	        (empty? remaining-tests) true
-	        (not (try (with-timeout 2000 (next-test (:class class))) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))) false
+	        (not (try (with-timeout 2000 (next-test (:class class)) (:code class)) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))) false
 	        :else (recur (rest remaining-tests)))
        ))))
 
