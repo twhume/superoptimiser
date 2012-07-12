@@ -36,40 +36,40 @@
 (defn is-a-label?
   "Is the keyword in the sequence passed in a label?"
   [op]
-  (if (re-find #"^label_" (name op))
+  (if (re-find #"^label_" (name (first op)))
     true
     false))
 
 (defn add-opcode
   "Creates a child of an AbstractInsNode and returns it"
   [op labels & argseq]
-  (let [args (flatten argseq)]
+  (let [args (flatten argseq) opcode (first op)]
   (cond
-    (= :istore op) (new VarInsnNode 54 (first args))
-    (= :istore_0 op) (new VarInsnNode 54 0)
-    (= :istore_1 op) (new VarInsnNode 54 1)
-    (= :istore_2 op) (new VarInsnNode 54 2)
-    (= :istore_3 op) (new VarInsnNode 54 3)
-    (= :iload op) (new VarInsnNode 21 (first args))
-    (= :iload_0 op) (new VarInsnNode 21 0)
-    (= :iload_1 op) (new VarInsnNode 21 1)
-    (= :iload_2 op) (new VarInsnNode 21 2)
-    (= :iload_3 op) (new VarInsnNode 21 3)
-    (= :iinc op) (new IincInsnNode (first args) (second args)) 
-    (= :bipush op) (new IntInsnNode 16 (first args)) 
+    (= :istore opcode) (new VarInsnNode 54 (first args))
+    (= :istore_0 opcode) (new VarInsnNode 54 0)
+    (= :istore_1 opcode) (new VarInsnNode 54 1)
+    (= :istore_2 opcode) (new VarInsnNode 54 2)
+    (= :istore_3 opcode) (new VarInsnNode 54 3)
+    (= :iload opcode) (new VarInsnNode 21 (first args))
+    (= :iload_0 opcode) (new VarInsnNode 21 0)
+    (= :iload_1 opcode) (new VarInsnNode 21 1)
+    (= :iload_2 opcode) (new VarInsnNode 21 2)
+    (= :iload_3 opcode) (new VarInsnNode 21 3)
+    (= :iinc opcode) (new IincInsnNode (first args) (second args)) 
+    (= :bipush opcode) (new IntInsnNode 16 (first args)) 
     
     ; Look up any label node from the labels map passed in
-    (is-a-label? op) (get labels op) 
-    (is-jump? op) (new JumpInsnNode ((opcodes op) :opcode) ((first args) labels))
+    (is-a-label? op) (get labels opcode) 
+    (is-jump? opcode) (new JumpInsnNode ((opcodes opcode) :opcode) ((first args) labels))
     
-    (nil? ((opcodes op) :args)) (new InsnNode ((opcodes op) :opcode))
+    (nil? ((opcodes opcode) :args)) (new InsnNode ((opcodes opcode) :opcode))
     :else nil)))
 
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
   [insnlist ocs labels]
-  (let [op-tuple (first ocs) op (first op-tuple) num-args (if (is-a-label? op) 0 (count ((opcodes op) :args)))]
-    (. insnlist add (add-opcode op labels (rest op-tuple)))
+  (let [op-tuple (first ocs) op (first op-tuple) num-args (if (is-a-label? op-tuple) 0 (count ((opcodes op) :args)))]
+    (. insnlist add (add-opcode op-tuple labels (rest op-tuple)))
     (rest ocs )))
 
 (defn insert-at
@@ -147,7 +147,7 @@
   [o]
   (into {} (map #(assoc {} % (new LabelNode))
                 (distinct
-                  (filter is-a-label? (flatten o))))))
+                  (filter is-a-label? o)))))
 
 (is (= 1 (count (make-labels-map (add-labels '((:iload_0) (:goto -1) (:ireturn)))))))
 

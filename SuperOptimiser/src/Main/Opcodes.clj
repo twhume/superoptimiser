@@ -72,7 +72,7 @@
 ;    (no-redundancy? n s)
 ))
 
-(defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s %) (keys opcodes))))
+(defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
 
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
@@ -111,10 +111,10 @@
     (map #(hash-map :length seq-length :vars max-vars :code % )
               (apply cartesian-product
                 (map-indexed (partial expand-arg max-vars seq-length) 
-                     (map #(cons % (:args (opcodes %))) s))))))
+                     (map #(cons (first %) (:args (opcodes (first %)))) s))))))
 
 (is (= '({:vars 1, :length 3, :code ((:iconst_4) (:goto -1) (:ireturn))} {:vars 1, :length 3, :code ((:iconst_4) (:goto 1) (:ireturn))})
-    (expand-opcodes 1 '[:iconst_4 :goto :ireturn])))
+    (expand-opcodes 1 '((:iconst_4) (:goto) (:ireturn)))))
 
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
