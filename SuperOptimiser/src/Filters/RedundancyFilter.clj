@@ -203,7 +203,7 @@
   "Does the supplied candidate (presuming num-args arguments) contain no redundant sequence of operations?"
   [num-args s]
   (loop [remainder s cur-state (init-state num-args) past-states '()]
-    (let [cur-op (first remainder)]
+    (let [cur-op (first (first remainder))]
       (cond
         (empty? remainder) true
         
@@ -226,10 +226,10 @@
         :else
         (recur (rest remainder) (add-state cur-state cur-op) (cons cur-state past-states))))))
 
-(is (= true (no-redundancy? 1 '[:iload_0 :ireturn])))
-(is (= false (no-redundancy? 1 '[:iload_0 :iload_0 :iload_1 :pop2 :ireturn])))
-(is (= true (no-redundancy? 1 '[:iload_0 :ineg :ireturn])))
-(is (= true (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :ireturn])))
-(is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :iadd :pop :ireturn])))
-(is (= false (no-redundancy? 1 '[:iload_0 :iconst_1 :istore_1 :iload_1 :pop :ireturn])))
-(is (= false (no-redundancy? 1 '[:iload_0 :istore_0 :ireturn])))
+(is (= true (no-redundancy? 1 '((:iload_0) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:iload_0) (:iload_1) (:pop2) (:ireturn)))))
+(is (= true (no-redundancy? 1 '((:iload_0) (:ineg) (:ireturn)))))
+(is (= true (no-redundancy? 1 '((:iload_0) (:iconst_1) (:iadd) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:iconst_1) (:iadd) (:pop) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:iconst_1) (:istore_1) (:iload_1) (:pop) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:istore_0) (:ireturn)))))

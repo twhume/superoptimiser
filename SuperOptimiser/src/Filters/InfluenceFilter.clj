@@ -94,7 +94,7 @@
   "Is the output of the sequence determined by its inputs?"
   [nv l]
   (loop [head l infl-map {:vars (into {} (map #(assoc {} % #{%}) (range 0 nv))) :stack '()}]
-    (let [op (first head)]
+    (let [op (first (first head))]
       (cond
         (empty? head) true
         
@@ -172,9 +172,9 @@
                 false)))))
 
 
-(is (= true (retains-influence? 1 '[:iload_0 :ireturn])))
-(is (= false (retains-influence? 1 '[:bipush :ireturn])))
-(is (= false (retains-influence? 1 '[:iload_0 :bipush :ireturn])))
-(is (= true (retains-influence? 1 '[:iload_0 :bipush :pop :ireturn])))
-(is (= true (retains-influence? 1 '[:iload_0 :bipush :pop :ineg :ireturn])))
-(is (= true (retains-influence? 1 '[:iload_0 :dup :pop :ineg :ireturn])))
+(is (= true (retains-influence? 1 '((:iload_0) (:ireturn)))))
+(is (= false (retains-influence? 1 '((:bipush) (:ireturn)))))
+(is (= false (retains-influence? 1 '((:iload_0) (:bipush) (:ireturn)))))
+(is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:pop) (:ireturn)))))
+(is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:pop) (:ineg) (:ireturn)))))
+(is (= true (retains-influence? 1 '((:iload_0) (:dup) (:pop) (:ineg) (:ireturn)))))
