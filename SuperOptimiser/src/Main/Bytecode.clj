@@ -103,7 +103,7 @@
 (is (= '((:a) (:b) (:c) (:d) (:e :1)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 4)))
 
 (defn update-labelling
-  "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label"
+  "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label, given that there are j jumps landing before the current position"
   [s i p d]
   (if (>= d 1) (replace-at (insert-at s (list i) p d) i p)
     (replace-at (insert-at s (list i) p d) i (+ 1 p))))
@@ -118,7 +118,6 @@
 (is (= '((:a :1) (:b) (:c) (:1) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 3)))
 (is (= '((:a :1) (:b) (:c) (:d) (:1) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 4)))
 
-
 (defn add-labels
   "Takes a list of opcodes and arguments and adds label entries to correspond to branch destinations"
   [a]
@@ -130,7 +129,7 @@
                          (recur (rest input)
                               (update-labelling output label-key pos arg)
                               (inc jump-num)
-                              (inc pos)))
+                              (if (>= arg 1) (+ 1 pos) (+ 2 pos))))
         :else (recur (rest input) output jump-num (inc pos))))))
   ; loop through the list
   ; if we have a branch instruction, insert a label for the branch at the appropriate place, insert a reference to this label, and continue
@@ -140,6 +139,7 @@
 (is (= '((:iload_0) (:goto :label_0) (:label_0) (:istore_1) (:ireturn)) (add-labels '((:iload_0) (:goto 1) (:istore_1) (:ireturn)))))
 (is (= '((:iload_0) (:goto :label_0) (:istore_1) (:label_0) (:ireturn)) (add-labels '((:iload_0) (:goto 2) (:istore_1) (:ireturn)))))
 (is (= '((:label_0) (:bipush 1) (:goto :label_0) (:ireturn)) (add-labels '((:bipush 1) (:goto -1) (:ireturn)))))
+(is (= '((:label_0) (:label_1) (:iload_0) (:goto :label_0) (:goto :label_1) (:ireturn)) (add-labels '((:iload_0) (:goto -1) (:goto -2) (:ireturn)))))
 
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
