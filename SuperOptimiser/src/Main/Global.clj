@@ -95,3 +95,21 @@
 					  
   )
 
+(defn is-jump?
+  "Is the operation passed in one which triggers a jump?"
+  [op]
+  (or
+    (= op :goto)
+    (= op :if_icmpeq)
+    (= op :if_icmpne)
+    (= op :if_icmplt)
+    (= op :if_icmpge)
+    (= op :if_icmpgt)
+    (= op :if_icmple)
+    (= op :ifeq)
+    (= op :ifne)
+    (= op :iflt)
+    (= op :ifge)
+    (= op :ifgt)
+    (= op :ifle)))
+
