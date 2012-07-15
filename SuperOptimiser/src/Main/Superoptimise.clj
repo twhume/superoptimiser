@@ -54,20 +54,20 @@
   "Main driver function for the SuperOptimiser"
   [seq-len c-root m-name m-sig tests]
   (filter (partial check-passes tests)
-        (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
+        (map #(assoc % :class (get-class % c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
 (defn superoptimise-nocheck
   "Main driver function for the SuperOptimiser - doesn't do equivalence testing, uses pmap"
   [seq-len c-root m-name m-sig tests]
-        (pmap #(assoc % :class (get-class (:code %)  c-root m-name m-sig))
+        (pmap #(assoc % :class (get-class %  c-root m-name m-sig))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))
 
 (defn superoptimise-pmap
   "Main driver function for the SuperOptimiser - using pmap"
   [seq-len c-root m-name m-sig tests]
   (filter (partial check-passes tests)
-        (pmap #(assoc % :class (get-class (:code %)  c-root m-name m-sig (:seq-num %)))
+        (pmap #(assoc % :class (get-class %  c-root m-name m-sig (:seq-num %)))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
 ; ---- Parallelised implementation below ----
@@ -75,7 +75,7 @@
 (defn make-classes
   "Takes a sequence s, maps all its entries into classes"
   [c-root m-name m-sig tests s]
- (filter (partial check-passes tests) (map #(assoc % :class (get-class (:code %)  c-root m-name m-sig)) s))
+ (filter (partial check-passes tests) (map #(assoc % :class (get-class %  c-root m-name m-sig)) s))
 )
 
 (defn superoptimise-partitioned

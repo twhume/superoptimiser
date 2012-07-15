@@ -110,7 +110,7 @@
 (is (= {1 3 2 3} (list-jumps '((:iload_0) (:goto 2) (:goto 1) (:ireturn)))))
 
 (defn expand-single-arg
-  "Expand a single argument"
+  "Expand a single argument to an opcode into all of its possibilities"
   [vars length position op arg]
   (cond 
         (= arg :local-var) (range 0 vars)

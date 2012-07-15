@@ -87,7 +87,6 @@
 (defn update-labelling
   "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label, given that there are j jumps landing before the current position"
   [s i p d]
-  (println "update-labelling" s i p d)
   (if (>= d 1) (replace-at (insert-at s (list i) p d) i p)
     (replace-at (insert-at s (list i) p d) i (+ 1 p))))
 
@@ -136,10 +135,10 @@
 (is (= 1 (count (make-labels-map (add-labels '((:iload_0) (:goto -1) (:ireturn)))))))
 
 (defn get-instructions
-  "Turns the supplied list of opcodes and arguments into an InsnList"
+  "Turns the supplied map containing a list of opcodes and arguments into an InsnList"
   [a]
   (try
-	  (let [l (new InsnList) labelled-opcodes (add-labels a) labels-map (make-labels-map labelled-opcodes)]
+	  (let [l (new InsnList) labelled-opcodes (add-labels (:code a)) labels-map (make-labels-map labelled-opcodes)]
 	    (loop [codes labelled-opcodes]
 	      (if (empty? codes) l
 	        (recur (add-opcode-and-args l codes labels-map)))))
@@ -149,19 +148,19 @@
    
    )
 
-(is (= 4 (. (get-instructions '((:iload_0) (:goto -1) (:ireturn))) size)))
-(is (= 2 (. (get-instructions '((:iload_0) (:ireturn))) size)))
-(is (= 1 (. (get-instructions '((:ireturn))) size)))
+(is (= 4 (. (get-instructions '{ :code ((:iload_0) (:goto -1) (:ireturn))}) size)))
+(is (= 2 (. (get-instructions '{ :code ((:iload_0) (:ireturn))}) size)))
+(is (= 1 (. (get-instructions '{ :code ((:ireturn))}) size)))
 
 (defn get-class-bytes
   "Creates a Java Class from the supplied data, returns an array of bytes representing that class. Input should be a map containing keys
    :length, :vars and :code, containing the number of opcodes, the max. number of local variables and a list of opcodes and arguments"
 
-  [code className methodName methodSig]
+  [sequence className methodName methodSig]
   (let [cn (new ClassNode)
         cw (new ClassWriter ClassWriter/COMPUTE_MAXS)
         mn (new MethodNode (+ Opcodes/ACC_PUBLIC Opcodes/ACC_STATIC) methodName methodSig nil nil)
-        ins (get-instructions code)]
+        ins (get-instructions (:code sequence))]
     (set! (. cn version) Opcodes/V1_5)
     (set! (. cn access) Opcodes/ACC_PUBLIC)
     (set! (. cn name) className)
