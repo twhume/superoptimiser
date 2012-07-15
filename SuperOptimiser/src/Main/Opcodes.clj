@@ -92,6 +92,23 @@
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore])))
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore :ixor])))
 
+(defn list-jumps
+  "Examine the sequence of opcodes o passed in for jump operations, and return a map of start -> dest for them"
+  [o]
+  (loop [remainder o jump-map {} pos 0]
+    (let [cur (first remainder) cur-op (first cur) cur-arg (second cur)] 
+      (if (empty? remainder) jump-map
+        (if (is-jump? cur-op)
+          (recur (rest remainder) (assoc jump-map pos (+ pos cur-arg)) (inc pos))
+          (recur (rest remainder) jump-map (inc pos)))))))
+
+(is (= {1 0} (list-jumps '((:iload_0) (:goto -1) (:ireturn)))))
+(is (= {1 2} (list-jumps '((:iload_0) (:goto 1) (:ireturn)))))
+(is (= {1 0 2 0} (list-jumps '((:iload_0) (:goto -1) (:goto -2) (:ireturn)))))
+(is (= {1 0 2 3} (list-jumps '((:iload_0) (:goto -1) (:goto 1) (:ireturn)))))
+(is (= {1 2 2 0} (list-jumps '((:iload_0) (:goto 1) (:goto -2) (:ireturn)))))
+(is (= {1 3 2 3} (list-jumps '((:iload_0) (:goto 2) (:goto 1) (:ireturn)))))
+
 (defn expand-single-arg
   "Expand a single argument"
   [vars length position op arg]
@@ -115,12 +132,12 @@
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
   [m s]
   (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
-    (map #(hash-map :length seq-length :vars max-vars :code % )
+    (map #(hash-map :length seq-length :vars max-vars :code % :jumps (list-jumps %))
               (apply cartesian-product
                 (map-indexed (partial expand-arg max-vars seq-length) 
                      (map #(cons (first %) (:args (opcodes (first %)))) s))))))
 
-(is (= '({:vars 1, :length 3, :code ((:iconst_4) (:goto -1) (:ireturn))} {:vars 1, :length 3, :code ((:iconst_4) (:goto 1) (:ireturn))})
+(is (= '({:vars 1, :length 3, :code ((:iconst_4) (:goto -1) (:ireturn)) :jumps {1 0}} {:vars 1, :length 3, :code ((:iconst_4) (:goto 1) (:ireturn))  :jumps {1 2}})
     (expand-opcodes 1 '((:iconst_4) (:goto) (:ireturn)))))
 
 (defn expanded-numbered-opcode-sequence
