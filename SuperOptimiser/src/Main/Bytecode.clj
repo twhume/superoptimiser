@@ -54,25 +54,6 @@
     (. insnlist add (add-opcode op-tuple labels (rest op-tuple)))
     (rest ocs )))
 
-(defn insert-at
-  "Create a new sequence consisting of the input sequence s with an extra item i inserted at a position distance d from p"
-  [s i p d]
-  (let [jump-dest (+ p d)]
-        (concat (take jump-dest s) (list i) (nthrest s jump-dest))))
-
-(is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 0)))
-(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 -1)))
-(is (= '((:a) (:1) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 -2)))
-(is (= '((:a) (:b) (:c) (:d) (:1) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 1)))
-(is (= '((:a) (:b) (:c) (:d) (:e) (:1)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3 2)))
-(is (= '((:1) (:a) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0 0)))
-(is (= '((:a) (:1) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0 1)))
-(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0 2)))
-(is (= '((:a) (:b) (:c) (:d) (:1) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 0)))
-(is (= '((:a) (:b) (:c) (:d) (:e) (:1)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 1)))
-(is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 -1)))
-(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4 -2)))
- 
 (defn replace-at
   "Create a new sequence consisting of the input sequence s with the item at position p having its argument replaced by i"
   [s i p]
@@ -84,46 +65,72 @@
 (is (= '((:a) (:b) (:c) (:d :1) (:e)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 3)))
 (is (= '((:a) (:b) (:c) (:d) (:e :1)) (replace-at '((:a) (:b) (:c) (:d) (:e)) :1 4)))
 
+(defn insert-at
+  "Create a new sequence consisting of the input sequence s with an extra item i inserted at a position distance d from p"
+  [s i p]
+  (concat (take p s) (list i) (nthrest s p)))
+
+(is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 2)))
+(is (= '((:a) (:1) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 1)))
+(is (= '((:a) (:b) (:c) (:d) (:1) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4)))
+(is (= '((:a) (:b) (:c) (:d) (:e) (:1)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 5)))
+(is (= '((:1) (:a) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 0)))
+(is (= '((:a) (:1) (:b) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 1)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 2)))
+(is (= '((:a) (:b) (:c) (:d) (:1) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 4)))
+(is (= '((:a) (:b) (:c) (:d) (:e) (:1)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 5)))
+(is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3)))
+(is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 2)))
+ 
+(defn calc-offset
+  "How many jumps starting on or before s that have their destination before d are there in list jl?"
+  [s d jl]
+  (println s d jl)
+  (reduce #(if (and (< %2 s) (<= (get jl %2) d)) (inc %1) (identity %1)) 0 (keys jl)))
+
+(is (= 0 (calc-offset 0 0 '{1 0})))
+(is (= 1 (calc-offset 1 0 '{1 0})))
+(is (= 1 (calc-offset 1 1 '{1 0})))
+  
+(is (= 0 (calc-offset 1 1 '{1 2})))
+(is (= 1 (calc-offset 1 2 '{1 2})))
+
+(is (= 0 (calc-offset 1 2 '{2 0})))
+(is (= 1 (calc-offset 2 2 '{2 0})))
+
+(is (= 0 (calc-offset 1 0 '{2 0 1 2})))
+(is (= 0 (calc-offset 1 1 '{2 0 1 2})))
+(is (= 1 (calc-offset 2 1 '{2 0 1 2})))
+(is (= 2 (calc-offset 2 2 '{2 0 1 2})))
+
 (defn update-labelling
-  "Return a modified version of sequence s such that it includes a label i at offset d from position p, and points to that label, given that there are j jumps landing before the current position"
-  [s i p d]
-  (if (>= d 1) (replace-at (insert-at s (list i) p d) i p)
-    (replace-at (insert-at s (list i) p d) i (+ 1 p))))
-
-(is (= '((:1) (:a) (:b) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -4)))
-(is (= '((:a) (:1) (:b) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -3)))
-(is (= '((:a) (:b) (:1) (:c) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -2)))
-(is (= '((:a) (:b) (:c) (:1) (:d) (:e :1)) (update-labelling '((:a) (:b) (:c) (:d) (:e -2)) :1 4 -1)))
-
-(is (= '((:a :1) (:1) (:b) (:c) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 1)))
-(is (= '((:a :1) (:b) (:1) (:c) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 2)))
-(is (= '((:a :1) (:b) (:c) (:1) (:d) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 3)))
-(is (= '((:a :1) (:b) (:c) (:d) (:1) (:e)) (update-labelling '((:a -2) (:b) (:c) (:d) (:e)) :1 0 4)))
+  "Return a modified version of sequence se to include a label l for jump cur-jump, given the jumps list jl"
+  [se l cur-jump all-jumps]
+  (let [src (first cur-jump) dst (second cur-jump) offset (calc-offset src dst all-jumps)]
+    (println offset)
+    (replace-at
+      (insert-at se (list l) dst)
+      l (+ offset src))))
 
 (defn add-labels
-  "Takes a list of opcodes and arguments and adds label entries to correspond to branch destinations"
-  [a]
-  (loop [input a output a jump-num 0 pos 0]
-    (let [cur (first input) op (first cur) arg (second cur)]
-      (cond
-        (empty? input) output
-        (is-jump? op) (let [label-key (keyword (str "label_" jump-num))]
-                         (recur (rest input)
-                              (update-labelling output label-key pos arg)
-                              (inc jump-num)
-                              (if (>= arg 1) (+ 1 pos) (+ 2 pos))
-;                              (inc pos)
-))
-        :else (recur (rest input) output jump-num (inc pos))))))
-  ; loop through the list
-  ; if we have a branch instruction, insert a label for the branch at the appropriate place, insert a reference to this label, and continue
-  ; otherwise move to the next instruction
-
-(is (= '((:label_0) (:iload_0) (:goto :label_0) (:ireturn)) (add-labels '((:iload_0) (:goto -1) (:ireturn)))))
-(is (= '((:iload_0) (:goto :label_0) (:label_0) (:istore_1) (:ireturn)) (add-labels '((:iload_0) (:goto 1) (:istore_1) (:ireturn)))))
-(is (= '((:iload_0) (:goto :label_0) (:istore_1) (:label_0) (:ireturn)) (add-labels '((:iload_0) (:goto 2) (:istore_1) (:ireturn)))))
-(is (= '((:label_0) (:bipush 1) (:goto :label_0) (:ireturn)) (add-labels '((:bipush 1) (:goto -1) (:ireturn)))))
-(is (= '((:label_0) (:label_1) (:iload_0) (:goto :label_0) (:goto :label_1) (:ireturn)) (add-labels '((:iload_0) (:goto -1) (:goto -2) (:ireturn)))))
+  "Takes a sequence of opcodes+arguments and a map of jumps; uses the map to add appropriate label entries to correspond to branch destinations"
+  [code jumps]
+  (loop [remainder jumps output code jump-num 0]
+    (let [label-key (keyword (str "label_" 0))]
+      (if (empty? remainder) output
+        (recur (rest remainder) (update-labelling output label-key (first remainder) jumps) (inc jump-num))))))
+  
+(is (= '((:label_0) (:iload_0) (:goto :label_0) (:ireturn))
+       (add-labels '((:iload_0) (:goto -1) (:ireturn)) {1 0})))
+(is (= '((:iload_0) (:goto :label_0) (:label_0) (:istore_1) (:ireturn))
+       (add-labels '((:iload_0) (:goto 1) (:istore_1) (:ireturn)) {1 2})))
+(is (= '((:iload_0) (:goto :label_0) (:istore_1) (:label_0) (:ireturn))
+       (add-labels '((:iload_0) (:goto 2) (:istore_1) (:ireturn)) {1 3})))
+(is (= '((:label_0) (:bipush 1) (:goto :label_0) (:ireturn))
+       (add-labels '((:bipush 1) (:goto -1) (:ireturn)) {1 0})))
+(is (= '((:label_0) (:label_1) (:iload_0) (:goto :label_0) (:goto :label_1) (:ireturn))
+       (add-labels '((:iload_0) (:goto -1) (:goto -2) (:ireturn)) {1 0 2 0})))
 
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
@@ -138,7 +145,7 @@
   "Turns the supplied map containing a list of opcodes and arguments into an InsnList"
   [a]
   (try
-	  (let [l (new InsnList) labelled-opcodes (add-labels (:code a)) labels-map (make-labels-map labelled-opcodes)]
+	  (let [l (new InsnList) labelled-opcodes (add-labels (:code a) (:jumps a)) labels-map (make-labels-map labelled-opcodes)]
 	    (loop [codes labelled-opcodes]
 	      (if (empty? codes) l
 	        (recur (add-opcode-and-args l codes labels-map)))))
