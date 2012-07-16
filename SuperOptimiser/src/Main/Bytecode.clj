@@ -132,7 +132,7 @@
                 (distinct
                   (filter is-a-label? o)))))
 
-(is (= 1 (count (make-labels-map (add-labels '((:iload_0) (:goto -1) (:ireturn)))))))
+(is (= 1 (count (make-labels-map (add-labels '((:iload_0) (:goto -1) (:ireturn)) '{1 0})))))
 
 (defn get-instructions
   "Turns the supplied map containing a list of opcodes and arguments into an InsnList"
@@ -148,9 +148,9 @@
    
    )
 
-(is (= 4 (. (get-instructions '{ :code ((:iload_0) (:goto -1) (:ireturn))}) size)))
-(is (= 2 (. (get-instructions '{ :code ((:iload_0) (:ireturn))}) size)))
-(is (= 1 (. (get-instructions '{ :code ((:ireturn))}) size)))
+(is (= 4 (. (get-instructions '{ :code ((:iload_0) (:goto -1) (:ireturn)) :jumps {1 0}}) size)))
+(is (= 2 (. (get-instructions '{ :code ((:iload_0) (:ireturn)) :jumps {}}) size)))
+(is (= 1 (. (get-instructions '{ :code ((:ireturn)) :jumps {}}) size)))
 
 (defn get-class-bytes
   "Creates a Java Class from the supplied data, returns an array of bytes representing that class. Input should be a map containing keys
