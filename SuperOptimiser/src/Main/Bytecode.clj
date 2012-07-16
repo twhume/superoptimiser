@@ -87,39 +87,32 @@
   "How many jumps starting on or before s that have their destination before d are there in list jl?"
   [s d jl]
   (println s d jl)
-  (reduce #(if (and (< %2 s) (<= (get jl %2) d)) (inc %1) (identity %1)) 0 (keys jl)))
+  (reduce #(if (and (<= %2 s) (<= (get jl %2) d)) (inc %1) (identity %1)) 0 (keys jl)))
 
-(is (= 0 (calc-offset 0 0 '{1 0})))
-(is (= 1 (calc-offset 1 0 '{1 0})))
-(is (= 1 (calc-offset 1 1 '{1 0})))
-  
-(is (= 0 (calc-offset 1 1 '{1 2})))
-(is (= 1 (calc-offset 1 2 '{1 2})))
 
-(is (= 0 (calc-offset 1 2 '{2 0})))
-(is (= 1 (calc-offset 2 2 '{2 0})))
+(defn labels-inserted-before
+  [max-jump-src node jl]
+  (reduce #(if (and (< %2 max-jump-src) (<= (get jl %2) node)) (inc %1) (identity %1)) 0 (keys jl)))
 
-(is (= 0 (calc-offset 1 0 '{2 0 1 2})))
-(is (= 0 (calc-offset 1 1 '{2 0 1 2})))
-(is (= 1 (calc-offset 2 1 '{2 0 1 2})))
-(is (= 2 (calc-offset 2 2 '{2 0 1 2})))
-
-(defn update-labelling
-  "Return a modified version of sequence se to include a label l for jump cur-jump, given the jumps list jl"
-  [se l cur-jump all-jumps]
-  (let [src (first cur-jump) dst (second cur-jump) offset (calc-offset src dst all-jumps)]
-    (println offset)
-    (replace-at
-      (insert-at se (list l) dst)
-      l (+ offset src))))
+(is (= (labels-inserted-before 1 1 '{1 2 2 0})))
 
 (defn add-labels
   "Takes a sequence of opcodes+arguments and a map of jumps; uses the map to add appropriate label entries to correspond to branch destinations"
   [code jumps]
   (loop [remainder jumps output code jump-num 0]
-    (let [label-key (keyword (str "label_" 0))]
       (if (empty? remainder) output
-        (recur (rest remainder) (update-labelling output label-key (first remainder) jumps) (inc jump-num))))))
+        (let [cur-jump (first remainder)
+              src (first cur-jump)
+              dst (second cur-jump)
+              labels-before-src (if (< dst src) (inc (labels-inserted-before src src jumps)) (labels-inserted-before src dst jumps))
+              labels-before-dst (labels-inserted-before src dst jumps)
+              label-key (keyword (str "label_" jump-num))]
+          (recur (rest remainder)
+                 (replace-at
+                   (insert-at output (list label-key) (+ dst labels-before-dst))
+                   label-key
+                   (+ src labels-before-src))
+                 (inc jump-num))))))
   
 (is (= '((:label_0) (:iload_0) (:goto :label_0) (:ireturn))
        (add-labels '((:iload_0) (:goto -1) (:ireturn)) {1 0})))
