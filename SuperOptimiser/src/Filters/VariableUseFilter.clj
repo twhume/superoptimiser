@@ -36,29 +36,32 @@
     (loop [head l last-op initial-hash]
       (let [op_args (first head) op (first op_args) vm-update (update-varmap op_args)]
 	      (cond
-	        (empty? head) true
+         (empty? head) true
+         
+         ; If we've hit a jump, all bets are off... let this one through
+         (is-jump? op) true
          
          ; If we're reading from, a variable which has never been written, fail the sequence
          
-	        (and (= op :iload_0) (= nil (get last-op 0))) false 
-	        (and (= op :iload_1) (= nil (get last-op 1))) false
-	        (and (= op :iload_2) (= nil (get last-op 2))) false
-	        (and (= op :iload_3) (= nil (get last-op 3))) false
-          (and (= op :iload) (= nil (get last-op (nth head 1)))) false
+	       (and (= op :iload_0) (= nil (get last-op 0))) false 
+	       (and (= op :iload_1) (= nil (get last-op 1))) false
+	       (and (= op :iload_2) (= nil (get last-op 2))) false
+	       (and (= op :iload_3) (= nil (get last-op 3))) false
+         (and (= op :iload) (= nil (get last-op (nth head 1)))) false
 
          ; handle :iload
          
          ; If we're writing from a variable which we last wrote to (i.e. overwriting data), fail the sequence
-	        (and (= op :istore_0) (= :write (get last-op 0))) false
-	        (and (= op :istore_1) (= :write (get last-op 1))) false
-	        (and (= op :istore_2) (= :write (get last-op 2))) false
-	        (and (= op :istore_3) (= :write (get last-op 3))) false
-          (and (= op :istore) (= :write (get last-op (nth head 1)))) false
+	       (and (= op :istore_0) (= :write (get last-op 0))) false
+	       (and (= op :istore_1) (= :write (get last-op 1))) false
+	       (and (= op :istore_2) (= :write (get last-op 2))) false
+	       (and (= op :istore_3) (= :write (get last-op 3))) false
+         (and (= op :istore) (= :write (get last-op (nth head 1)))) false
          
          ; otherwise record the read-write state; skip the appropriate number of instructions; carry on
           
-	        :else (if (= nil vm-update) (recur (rest head) last-op)
-                 (recur (rest head) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
+	       :else (if (= nil vm-update) (recur (rest head) last-op)
+                (recur (rest head) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
 
 (is (= true (uses-vars-ok? 0 '((:ixor)))))
 (is (= false (uses-vars-ok? 0 '((:iload_0)))))
