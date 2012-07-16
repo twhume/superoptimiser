@@ -160,7 +160,7 @@
   (let [cn (new ClassNode)
         cw (new ClassWriter ClassWriter/COMPUTE_MAXS)
         mn (new MethodNode (+ Opcodes/ACC_PUBLIC Opcodes/ACC_STATIC) methodName methodSig nil nil)
-        ins (get-instructions (:code sequence))]
+        ins (get-instructions sequence)]
     (set! (. cn version) Opcodes/V1_5)
     (set! (. cn access) Opcodes/ACC_PUBLIC)
     (set! (. cn name) className)
@@ -192,7 +192,9 @@
         (load-class full-class-name
                     (get-class-bytes code full-class-name methodName methodSig)
                     (if (= 0 (mod seqnum 50000)) (swap! classloader instantiate-classloader) @classloader)))
-      (catch ClassFormatError cfe nil)))
+      (catch ClassFormatError cfe (do
+                                    (println cfe)
+                                    nil))))
 
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
 ;(ns-unmap 'org.tomhume.so.Bytecode 'f2)
