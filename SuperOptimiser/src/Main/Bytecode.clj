@@ -91,6 +91,7 @@
 
 
 (defn labels-inserted-before
+  "How many of the jumps in the map jl have a src node before max-jump-src and insert a label before node?"
   [max-jump-src node jl]
   (reduce #(if (and (< %2 max-jump-src) (<= (get jl %2) node)) (inc %1) (identity %1)) 0 (keys jl)))
 
@@ -104,7 +105,8 @@
         (let [cur-jump (first remainder)
               src (first cur-jump)
               dst (second cur-jump)
-              labels-before-src (if (< dst src) (inc (labels-inserted-before src src jumps)) (labels-inserted-before src dst jumps))
+              labels-before-src-raw (labels-inserted-before src src jumps)
+              labels-before-src (if (< dst src) (inc labels-before-src-raw) labels-before-src-raw)
               labels-before-dst (labels-inserted-before src dst jumps)
               label-key (keyword (str "label_" jump-num))]
           (recur (rest remainder)
@@ -144,9 +146,7 @@
 	        (recur (add-opcode-and-args l codes labels-map)))))
    (catch Exception e (do
                         (println "Exception " e a)
-                        (throw e))))
-   
-   )
+                        (throw e)))))
 
 (is (= 4 (. (get-instructions '{ :code ((:iload_0) (:goto -1) (:ireturn)) :jumps {1 0}}) size)))
 (is (= 2 (. (get-instructions '{ :code ((:iload_0) (:ireturn)) :jumps {}}) size)))
