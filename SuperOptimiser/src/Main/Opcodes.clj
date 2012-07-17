@@ -54,7 +54,7 @@
   (and
     true
     (finishes-ireturn? s)
-    (uses-vars-ok? n false s)
+    (uses-vars-ok? n true s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
     (retains-influence? n s)
@@ -95,7 +95,7 @@
 (defn list-jumps
   "Examine the sequence of opcodes o passed in for jump operations, and return a map of start -> dest for them"
   [o]
-  (loop [remainder o jump-map {} pos 0]
+  (loop [remainder o jump-map (sorted-map) pos 0]
     (let [cur (first remainder) cur-op (first cur) cur-arg (second cur)] 
       (if (empty? remainder) jump-map
         (if (is-jump? cur-op)
