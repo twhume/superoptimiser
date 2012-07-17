@@ -18,15 +18,16 @@
 (defmacro with-timeout [millis opcodes & body]
     `(let [future# (future ~@body)]
       (try
-        (.get future# ~millis java.util.concurrent.TimeUnit/MILLISECONDS)
+          (.get future# ~millis java.util.concurrent.TimeUnit/MILLISECONDS)
         (catch java.util.concurrent.TimeoutException x# 
           (do
             (println "Terminating" ~opcodes)
-            (future-cancel future#)
+            (println (future-cancel future#))
             false)))))
 
 ; Unit test to check infinite loops finish and fail
-(is (= false (with-timeout 2000 '() (recur))))
+;(is (= false (with-timeout 1000 '(:a) (recur))))
+;(is (= true (with-timeout 1000 '(:b) (= true true))))
 
 
 ; generate all 2-sequence bytecodes
@@ -39,13 +40,16 @@
   [tests class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
-    (loop [remaining-tests tests]
-      (let [next-test (first remaining-tests)]
-	      (cond
-	        (empty? remaining-tests) true
-	        (not (try (with-timeout 2000 (next-test (:class class)) (:code class)) (catch Exception e (do (println (:code class) e) false)) (catch Error e (do (println (:code class) e) false)))) false
-	        :else (recur (rest remaining-tests)))
-       ))))
+      (loop [remaining-tests tests]
+        (let [next-test (first remaining-tests)]
+          (cond
+            (empty? remaining-tests) true
+            (not 
+              (try
+                (next-test (:class class))
+                (catch Exception e (do (println "Exception" (:code class) e) false))
+                (catch Error e (do (println "Error" (:code class) e) false)))) false
+            :else (recur (rest remaining-tests)))))))
 
 
 
