@@ -54,7 +54,7 @@
   (and
     true
     (finishes-ireturn? s)
-    (uses-vars-ok? n s)
+    (uses-vars-ok? n false s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
     (retains-influence? n s)
@@ -67,7 +67,7 @@
   (and
     true
     (no-ireturn? s)
-    (uses-vars-ok? n s)
+    (uses-vars-ok? n false s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
     (no-redundancy? n s)

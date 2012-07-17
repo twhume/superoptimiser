@@ -29,14 +29,22 @@
 (is (= '(7 :write) (update-varmap '[:istore 7])))
 (is (= '(12 :read) (update-varmap '[:iload 12])))
 
+(defn no-trailing-writes?
+  "Are there are no variables to which the last operation was a write?"
+  [vm]
+  (nil? (some #{:write} (vals vm))))
+
+(is (= true (no-trailing-writes? '{0 :read 1 :read 2 :read})))
+(is (= false (no-trailing-writes? '{0 :read 1 :write 2 :read})))
+
 (defn uses-vars-ok?
   "Does the supplied sequence try to read from local variables only after they're written to, and not overwrite values in variables?"
-  [nv l]
+  [nv fail-trailing-writes l]
   (let [initial-hash (into {} (map #(assoc {} (identity %) :write) (range 0 nv)))]
     (loop [head l last-op initial-hash]
       (let [op_args (first head) op (first op_args) vm-update (update-varmap op_args)]
 	      (cond
-         (empty? head) true
+         (empty? head) (if fail-trailing-writes (no-trailing-writes? last-op) true)
          
          ; If we've hit a jump, all bets are off... let this one through
          (is-jump? op) true
@@ -63,15 +71,29 @@
 	       :else (if (= nil vm-update) (recur (rest head) last-op)
                 (recur (rest head) (assoc last-op (nth vm-update 0) (nth vm-update 1)))))))))
 
-(is (= true (uses-vars-ok? 0 '((:ixor)))))
-(is (= false (uses-vars-ok? 0 '((:iload_0)))))
-(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0)))))
-(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0)))))
-(is (= false (uses-vars-ok? 0 '((:istore_1) (:iload_0)))))
-(is (= false (uses-vars-ok? 0 '((:istore_0) (:istore_0)))))
-(is (= true (uses-vars-ok? 0 '((:istore_0) (:istore_1)))))
-(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0) (:istore_0)))))
-(is (= true (uses-vars-ok? 0 '((:istore_0) (:iload_0) (:istore_0) (:iload_0) (:iload_0)))))
-(is (= false (uses-vars-ok? 0 '((:istore_0) (:iload_1) (:istore_0)))))
-(is (= true (uses-vars-ok? 1 '((:iload_0)))))
-(is (= false (uses-vars-ok? 1 '((:bipush) (:iload_3) (:ireturn)))))
+; Unit tests for the fertility version of this filter, which doesn't care about trailing writes
+(is (= true (uses-vars-ok? 0 false '((:ixor)))))
+(is (= false (uses-vars-ok? 0 false '((:iload_0)))))
+(is (= true (uses-vars-ok? 0 false '((:istore_0) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 false '((:istore_1) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 false '((:istore_0) (:istore_0)))))
+(is (= true (uses-vars-ok? 0 false '((:istore_0) (:istore_1)))))
+(is (= true (uses-vars-ok? 0 false '((:istore_0) (:iload_0) (:istore_0)))))
+(is (= true (uses-vars-ok? 0 false '((:istore_0) (:iload_0) (:istore_0) (:iload_0) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 false '((:istore_0) (:iload_1) (:istore_0)))))
+(is (= true (uses-vars-ok? 1 false '((:iload_0)))))
+(is (= false (uses-vars-ok? 1 false '((:bipush) (:iload_3) (:ireturn)))))
+
+; Unit tests for the validity version of this filter, which cares about trailing writes
+
+(is (= true (uses-vars-ok? 0 true '((:ixor)))))
+(is (= false (uses-vars-ok? 1 true '((:iload_0) (:istore_0)))))
+(is (= true (uses-vars-ok? 0 true '((:istore_0) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 true '((:istore_1) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 true '((:istore_0) (:istore_0)))))
+(is (= false (uses-vars-ok? 0 true '((:istore_0) (:istore_1)))))
+(is (= false (uses-vars-ok? 0 true '((:istore_0) (:iload_0) (:istore_0)))))
+(is (= true (uses-vars-ok? 0 true '((:istore_0) (:iload_0) (:istore_0) (:iload_0) (:iload_0)))))
+(is (= false (uses-vars-ok? 0 true '((:istore_0) (:iload_1) (:istore_0)))))
+(is (= true (uses-vars-ok? 1 true '((:iload_0)))))
+(is (= false (uses-vars-ok? 1 true '((:bipush) (:iload_3) (:ireturn)))))
