@@ -51,7 +51,7 @@
               
               ; branching
               
-              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0}
+;              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0}
               :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
               :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
               :if_icmplt  {:opcode 161 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
@@ -59,7 +59,7 @@
               :if_icmpgt  {:opcode 163 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
               :if_icmple  {:opcode 164 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
 
-              :ifeq {:opcode 153 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
+               :ifeq {:opcode 153 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
               :ifne {:opcode 154 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
               :iflt {:opcode 155 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
               :ifge {:opcode 156 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
