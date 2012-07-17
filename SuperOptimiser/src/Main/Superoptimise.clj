@@ -1,4 +1,5 @@
-(ns Main.Superoptimise)
+(ns Main.Superoptimise
+  (:import (java.util.concurrent TimeoutException TimeUnit FutureTask)))
 (import 'clojure.lang.Reflector)
 (use 'Main.Bytecode)
 (use 'Main.Opcodes)
@@ -13,39 +14,42 @@
   [s]
   (dec (- (.indexOf s ")") (.indexOf s "("))))
 
-; This macro runs a piece of code with a defined timeout; I took it from
-; http://stackoverflow.com/questions/6694530/executing-a-function-with-a-timeout
-(defmacro with-timeout [millis opcodes & body]
-    `(let [future# (future ~@body)]
-      (try
-          (.get future# ~millis java.util.concurrent.TimeUnit/MILLISECONDS)
-        (catch java.util.concurrent.TimeoutException x# 
-          (do
-            (println "Terminating" ~opcodes)
-            (println (future-cancel future#))
-            false)))))
+; The method below was adapted from code at https://github.com/flatland/clojail/blob/master/src/clojail/core.clj#L40
 
-; Unit test to check infinite loops finish and fail
-;(is (= false (with-timeout 1000 '(:a) (recur))))
-;(is (= true (with-timeout 1000 '(:b) (= true true))))
+(defn with-timeout
+  "Take a name, function, and timeout. Run the function in a named ThreadGroup until the timeout."
+  ([name code thunk time]
+     (let [tg (new ThreadGroup (str name)) task (FutureTask. (comp identity thunk))
+           thr (if tg (Thread. tg task) (Thread. task))]
+       (try
+         (.start thr)
+         (.get task time TimeUnit/MILLISECONDS)
+         (catch TimeoutException e
+           (.cancel task true)
+           (.stop thr)
+           (println "Timed out" name code)
+           false)
+         (catch Exception e
+           (.cancel task true)
+           (.stop thr) 
+           (println "Exception" e)
+           false)
+         (finally (when tg (.stop tg)))))))
 
-
-; generate all 2-sequence bytecodes
-; map each one to a class file
-; load the class file
-; pass it through the equivalence tests
+; Taken from http://stackoverflow.com/questions/2622750/why-does-clojure-hang-after-having-performed-my-calculations
+(defn pfilter [pred coll]
+  (map second
+    (filter first
+      (pmap (fn [item] [(pred item) item]) coll))))
 
 (defn check-passes
   "check if a class passes its equivalence tests"
   [tests class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
-    (try 
-      (every? #(% (:class class)) tests)
-      (catch Exception e (do (println "Exception" (:code class) e) false))
-;      (catch Error e (do (println "Error" (:code class) e) false)))))  
-      (catch Error e false))))
-
+    (let [test-fn (fn [] (every? #(% (:class class)) tests))]
+      (with-timeout num (:code class) test-fn 2000))))
+      
 (defn superoptimise
   "Main driver function for the SuperOptimiser"
   [seq-len c-root m-name m-sig tests]
@@ -62,8 +66,8 @@
 (defn superoptimise-pmap
   "Main driver function for the SuperOptimiser - using pmap"
   [seq-len c-root m-name m-sig tests]
-  (filter (partial check-passes tests)
-        (pmap #(assoc % :class (get-class % c-root m-name m-sig (:seq-num %)))
+  (pfilter (partial check-passes tests)
+        (map #(assoc % :class (get-class % c-root m-name m-sig (:seq-num %)))
              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
 ; ---- Parallelised implementation below ----
