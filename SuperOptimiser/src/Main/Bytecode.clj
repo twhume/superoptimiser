@@ -148,7 +148,7 @@
                         (println "Exception " e a)
                         (throw e)))))
 
-(is (= 4 (. (get-instructions '{ :code ((:iload_0) (:goto -1) (:ireturn)) :jumps {1 0}}) size)))
+(is (= 4 (. (get-instructions '{ :code ((:iload_0) (:ifeq -1) (:ireturn)) :jumps {1 0}}) size)))
 (is (= 2 (. (get-instructions '{ :code ((:iload_0) (:ireturn)) :jumps {}}) size)))
 (is (= 1 (. (get-instructions '{ :code ((:ireturn)) :jumps {}}) size)))
 
@@ -186,11 +186,11 @@
 
 (defn get-class
   "Creates and loads a class file with the given name"
-  [code className methodName methodSig seqnum]
+  [classmap className methodName methodSig seqnum]
     (try
       (let [full-class-name (str className "-" seqnum)]
         (load-class full-class-name
-                    (get-class-bytes code full-class-name methodName methodSig)
+                    (get-class-bytes classmap full-class-name methodName methodSig)
                     (if (= 0 (mod seqnum 50000)) (swap! classloader instantiate-classloader) @classloader)))
       (catch ClassFormatError cfe (do
                                     (println cfe)
