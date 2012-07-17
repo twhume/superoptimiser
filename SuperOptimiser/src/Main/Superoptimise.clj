@@ -40,19 +40,11 @@
   [tests class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
-      (loop [remaining-tests tests]
-        (let [next-test (first remaining-tests)]
-          (cond
-            (empty? remaining-tests) true
-            (not 
-              (try
-                (next-test (:class class))
-                (catch Exception e (do (println "Exception" (:code class) e) false))
-                (catch Error e (do (println "Error" (:code class) e) false)))) false
-            :else (recur (rest remaining-tests)))))))
-
-
-
+    (try 
+      (every? #(% (:class class)) tests)
+      (catch Exception e (do (println "Exception" (:code class) e) false))
+;      (catch Error e (do (println "Error" (:code class) e) false)))))  
+      (catch Error e false))))
 
 (defn superoptimise
   "Main driver function for the SuperOptimiser"
