@@ -51,7 +51,7 @@
               
               ; branching
               
-;              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0}
+              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0}
               :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
               :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
               :if_icmplt  {:opcode 161 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
@@ -95,11 +95,10 @@
 					  
   )
 
-(defn is-jump?
-  "Is the operation passed in one which triggers a jump?"
+(defn is-conditional-jump?
+  "Is the operation passed in one which triggers a jump based on the top element of the stack?"
   [op]
   (or
-    (= op :goto)
     (= op :if_icmpeq)
     (= op :if_icmpne)
     (= op :if_icmplt)
@@ -112,4 +111,11 @@
     (= op :ifge)
     (= op :ifgt)
     (= op :ifle)))
+
+(defn is-jump?
+  "Is the operation passed in one which triggers a jump?"
+  [op]
+  (or
+    (= op :goto)
+    (is-conditional-jump? op)))
 
