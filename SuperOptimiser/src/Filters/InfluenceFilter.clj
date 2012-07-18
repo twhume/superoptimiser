@@ -89,6 +89,17 @@
 ; unit tests for a DUP2_X2 (presuming integer arithmetic only)
 (is (= {:vars {} :stack '(#{1} #{2} #{3} #{4} #{1} #{2})} (duplicate-stack {:vars {} :stack '(#{1} #{2} #{3} #{4})} 2 4)))
 
+(defn contains-enough-iloads?
+  "Does the sequence supplied contain enough ILOAD instructions to be valid?"
+  [nv l]
+  (let [iload-set (set (map #(list (keyword (str "iload_" %))) (range 0 nv)))]
+    (subset? iload-set (set l))))
+
+(is (= true (contains-enough-iloads? 1 '((:iload_0) (:ireturn)))))
+(is (= false (contains-enough-iloads? 1 '((:iload_1) (:ireturn)))))
+(is (= false (contains-enough-iloads? 2 '((:iload_0) (:ireturn)))))
+(is (= false (contains-enough-iloads? 2 '((:iload_0) (:ireturn)))))
+(is (= true (contains-enough-iloads? 2 '((:iload_0) (:iload_1) (:ireturn)))))
 
 (defn retains-influence?
   "Is the output of the sequence determined by its inputs?"
@@ -157,8 +168,8 @@
         ; check that the item we are returning has been influenced by every input variable
         (= :ireturn op) (has-influence? nv (first (:stack infl-map)))
 
-        ; Hit a branch? All bets are off
-        (is-jump? op) true
+        ; Hit a branch? All bets are off, but check we at least have one ILOAD per argument
+        (is-jump? op) (contains-enough-iloads? nv l)
 
         :else (do
                 (println "Unhandled operation" op)
