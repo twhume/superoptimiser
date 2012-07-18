@@ -85,8 +85,8 @@
   "Main driver function for the SuperOptimiser - using pmap"
   [seq-len c-root m-name m-sig tests]
   (pfilter (partial check-passes tests)
-        (map #(assoc % :class (get-class % c-root m-name m-sig (:seq-num %)))
-             (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
+        (pmap #(assoc % :class (get-class % c-root m-name m-sig (:seq-num %)))
+              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
 ; ---- Parallelised implementation below ----
 
