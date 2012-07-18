@@ -42,14 +42,32 @@
     (filter first
       (pmap (fn [item] [(pred item) item]) coll))))
 
-(defn check-passes
+(defn check-passes-with-timeout
   "check if a class passes its equivalence tests"
   [tests class]
   (let [num (:seq-num class)]
     (do (if (= 0 (mod num 25000)) (println num)))
     (let [test-fn (fn [] (every? #(% (:class class)) tests))]
       (with-timeout num (:code class) test-fn 2000))))
-      
+
+(defn check-passes
+  "check if a class passes its equivalence tests"
+  [tests class]
+  (let [num (:seq-num class)]
+    (do (if (= 0 (mod num 25000)) (println num)))
+    (try
+      (every? #(% (:class class)) tests)
+    (catch Exception e
+      (println "Exception" e (:code class))
+      false)
+    (catch VerifyError e
+      ; ignore VerifyErrors
+      false)
+    (catch Error e
+      (println "Error" e  (:code class))
+      false))))
+
+
 (defn superoptimise
   "Main driver function for the SuperOptimiser"
   [seq-len c-root m-name m-sig tests]
