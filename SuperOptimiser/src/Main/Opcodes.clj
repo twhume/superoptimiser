@@ -117,7 +117,7 @@
         (= arg :s-byte) (range -127 128)
         (= arg :us-byte) (range 0 256)
         (= arg :byte) (range 0 256)
-        (= arg :branch-dest)  (filter #(not(= % 0)) (map #(- % position) (range 0 length)))
+        (= arg :branch-dest)  (filter #(not(< % 2)) (map #(- % position) (range 0 length)))
         :else (seq [(seq [op])])))
 
 (defn expand-arg
