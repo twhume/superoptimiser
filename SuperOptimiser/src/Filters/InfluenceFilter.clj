@@ -158,14 +158,7 @@
         (= :ireturn op) (has-influence? nv (first (:stack infl-map)))
 
         ; Hit a branch? All bets are off
-        (or 
-          (= :ifeq op)
-          (= :ifne op)
-          (= :iflt op)
-          (= :ifgt op)
-          (= :ifge op)
-          (= :ifle op)
-          (= :goto op)) true
+        (is-jump? op) true
 
         :else (do
                 (println "Unhandled operation" op)
@@ -175,6 +168,7 @@
 (is (= true (retains-influence? 1 '((:iload_0) (:ireturn)))))
 (is (= false (retains-influence? 1 '((:bipush) (:ireturn)))))
 (is (= false (retains-influence? 1 '((:iload_0) (:bipush) (:ireturn)))))
+(is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:goto) (:ireturn)))))
 (is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:pop) (:ireturn)))))
 (is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:pop) (:ineg) (:ireturn)))))
 (is (= true (retains-influence? 1 '((:iload_0) (:dup) (:pop) (:ineg) (:ireturn)))))
