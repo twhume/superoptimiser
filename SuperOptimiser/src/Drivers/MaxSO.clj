@@ -34,4 +34,4 @@
 
 (time 
   (doall
-        (superoptimise-pmap 6 class-name method-name method-signature eq-tests-filter)))
+        (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))

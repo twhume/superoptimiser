@@ -51,18 +51,20 @@
               
               ; branching
               
-;              :if_icmpeq  {:opcode 159 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-;              :if_icmpne  {:opcode 160 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-;              :if_icmplt  {:opcode 161 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-;              :if_icmpge  {:opcode 162 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-;              :if_icmpgt  {:opcode 163 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-;              :if_icmple  {:opcode 164 :args [:us-byte, :us-byte] :opstack-needs 2 :opstack-effect -2}
-;              :ifeq {:opcode 153 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-;              :ifne {:opcode 154 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-;              :iflt {:opcode 155 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-;              :ifge {:opcode 156 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-;              :ifgt {:opcode 157 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
-;              :ifle {:opcode 158 :args [:us-byte, :us-byte] :opstack-needs 1 :opstack-effect -1}
+              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0}
+              :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
+              :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
+              :if_icmplt  {:opcode 161 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
+              :if_icmpge  {:opcode 162 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2};
+              :if_icmpgt  {:opcode 163 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
+              :if_icmple  {:opcode 164 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2}
+
+               :ifeq {:opcode 153 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
+              :ifne {:opcode 154 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
+              :iflt {:opcode 155 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
+              :ifge {:opcode 156 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
+              :ifgt {:opcode 157 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
+              :ifle {:opcode 158 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1}
 
               :iinc {:opcode 132 :args [:local-var, :s-byte] :opstack-needs 0 :opstack-effect 0}
 ;              :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
@@ -81,16 +83,39 @@
               :ishl {:opcode 120 :opstack-needs 2 :opstack-effect -1}
               :ishr {:opcode 122 :opstack-needs 2 :opstack-effect -1}
 ;              :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
-              
-              ; TOODO ARGH. FORGOT TO TAKE INTO ACCOUNT POPPING OFF STACK UNTIL HERE - RECHECK ABOVE ENTRIES
- 
-              ; Commented out as these are just shortcuts for istore
-              
+                             
               :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
               :istore_1 {:opcode 60 :opstack-needs 1 :opstack-effect -1}
               :istore_2 {:opcode 61 :opstack-needs 1 :opstack-effect -1}
               :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
               :isub {:opcode 100 :opstack-needs 2 :opstack-effect -1}
               :iushr {:opcode 124 :opstack-needs 2 :opstack-effect -1}
-              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}})
+              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}}
+
+					  
+  )
+
+(defn is-conditional-jump?
+  "Is the operation passed in one which triggers a jump based on the top element of the stack?"
+  [op]
+  (or
+    (= op :if_icmpeq)
+    (= op :if_icmpne)
+    (= op :if_icmplt)
+    (= op :if_icmpge)
+    (= op :if_icmpgt)
+    (= op :if_icmple)
+    (= op :ifeq)
+    (= op :ifne)
+    (= op :iflt)
+    (= op :ifge)
+    (= op :ifgt)
+    (= op :ifle)))
+
+(defn is-jump?
+  "Is the operation passed in one which triggers a jump?"
+  [op]
+  (or
+    (= op :goto)
+    (is-conditional-jump? op)))
 

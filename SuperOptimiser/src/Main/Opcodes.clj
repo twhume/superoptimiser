@@ -23,41 +23,38 @@
                         [:ineg :ineg]       ; Two negations get us back where we started
                         [:iconst_0 :idiv]   ; Divide by zero, never fun
                         [:iconst_0 :irem]   ; Divide by zero, never fun
-                        [:iconst_0 :pop]
-                        [:iconst_m1 :pop]
-                        [:iconst_1 :pop]
-                        [:iconst_2 :pop]
-                        [:iconst_3 :pop]
-                        [:iconst_4 :pop]
-                        [:iconst_5 :pop]
-                        [:bipush :pop]
+                        [:iconst_0 :iadd]   ; Adding zero does nothing
+                        [:iconst_1 :imul]   ; Multiplying by 1 does nothing
+                        [:iconst_1 :idiv]   ; Dividing by 1 does nothing
                         ))
 
 (defn contains-no-redundant-pairs?
   "Does the supplied sequence contain any sequences of operations which are redundant?"
   [l]
-  (loop [pairs redundant-pairs]
-    (if (empty? pairs) true
-      (do
-        (let [cur-pair (first pairs) idx-first (.indexOf l (first cur-pair)) idx-next (inc idx-first)]
-        (if
-          (and
-            (> idx-first -1)
-            (< idx-first (dec (count l)))
-            (= (second cur-pair) (nth l idx-next))) false
-          (recur (rest pairs))))))))
+  (let [opcodes (map first l)]
+    (loop [pairs redundant-pairs]
+      (if (empty? pairs) true
+        (do
+          (let [cur-pair (first pairs) idx-first (.indexOf opcodes (first cur-pair)) idx-next (inc idx-first)]
+            (if
+              (and
+                (> idx-first -1)
+                (< idx-first (dec (count opcodes)))
+                (= (second cur-pair) (nth opcodes idx-next))) false
+              (recur (rest pairs)))))))))
 
-(is (= false (contains-no-redundant-pairs? '[:ixor :swap :swap])))
-(is (= false (contains-no-redundant-pairs? '[:swap :swap])))
-(is (= false (contains-no-redundant-pairs? '[:swap :swap :ixor])))
-(is (= true (contains-no-redundant-pairs? '[:ixor :swap :ixor :swap])))
+(is (= false (contains-no-redundant-pairs? '((:ixor) (:swap) (:swap)))))
+(is (= false (contains-no-redundant-pairs? '((:swap) (:swap)))))
+(is (= false (contains-no-redundant-pairs? '((:swap) (:swap) (:ixor)))))
+(is (= true (contains-no-redundant-pairs? '((:ixor) (:swap) (:ixor) (:swap)))))
 
 (defn is-valid?
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
   [n s]
   (and
+    true
     (finishes-ireturn? s)
-    (uses-vars-ok? n s)
+    (uses-vars-ok? n true s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
     (retains-influence? n s)
@@ -68,14 +65,15 @@
   "Master fertility filter: returns true if any children of this opcode sequence s with n arguments may be valid"
   [n s]
   (and
+    true
     (no-ireturn? s)
-    (uses-vars-ok? n s)
+    (uses-vars-ok? n false s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
     (no-redundancy? n s)
 ))
 
-(defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s %) (keys opcodes))))
+(defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
 
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
@@ -94,28 +92,53 @@
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore])))
 (is (= 2 (count-storage-ops [:ixor :istore_0 :istore :ixor])))
 
-(defn expand-arg
-  "Returns a sequence of bytes appropriate for the keyword passed in and number of local variables"
-  [vars k]
-  (cond 
-    (= k :local-var) (range 0 vars)
-    (= k :s-byte) (range -127 128)
-    (= k :us-byte) (range 0 256)
-    (= k :byte) (range 0 256)
-    :else (seq [k])))
+(defn list-jumps
+  "Examine the sequence of opcodes o passed in for jump operations, and return a map of start -> dest for them"
+  [o]
+  (loop [remainder o jump-map (sorted-map) pos 0]
+    (let [cur (first remainder) cur-op (first cur) cur-arg (second cur)] 
+      (if (empty? remainder) jump-map
+        (if (is-jump? cur-op)
+          (recur (rest remainder) (assoc jump-map pos (+ pos cur-arg)) (inc pos))
+          (recur (rest remainder) jump-map (inc pos)))))))
 
-(is (= '(0 1 2 3 4) (expand-arg 5 :local-var)))
-(is (= nil) (expand-arg 1 :dummy-keyword))
+(is (= {1 0} (list-jumps '((:iload_0) (:goto -1) (:ireturn)))))
+(is (= {1 2} (list-jumps '((:iload_0) (:goto 1) (:ireturn)))))
+(is (= {1 0 2 0} (list-jumps '((:iload_0) (:goto -1) (:goto -2) (:ireturn)))))
+(is (= {1 0 2 3} (list-jumps '((:iload_0) (:goto -1) (:goto 1) (:ireturn)))))
+(is (= {1 2 2 0} (list-jumps '((:iload_0) (:goto 1) (:goto -2) (:ireturn)))))
+(is (= {1 3 2 3} (list-jumps '((:iload_0) (:goto 2) (:goto 1) (:ireturn)))))
+
+(defn expand-single-arg
+  "Expand a single argument to an opcode into all of its possibilities"
+  [vars length position op arg]
+  (cond 
+        (= arg :local-var) (range 0 vars)
+        (= arg :s-byte) (range -127 128)
+        (= arg :us-byte) (range 0 256)
+        (= arg :byte) (range 0 256)
+        (= arg :branch-dest)  (filter #(not(< % 2)) (map #(- % position) (range 0 length)))
+        :else (seq [(seq [op])])))
+
+(defn expand-arg
+  "Returns a sequence of bytes appropriate for the (op and arguments) passed in in k and number of local variables"
+  [vars length position op_args]
+  (let [op (first op_args) args (rest op_args)]
+    (map #(cons op %)
+         (apply cartesian-product
+                (map (partial expand-single-arg vars length position op) args)))))
 
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
   [m s]
   (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
-    
-    (map #(hash-map :length seq-length :vars max-vars :code % )
+    (map #(hash-map :length seq-length :vars max-vars :code % :jumps (list-jumps %))
               (apply cartesian-product
-                (map (partial expand-arg max-vars) 
-                     (flatten (map #(cons % (:args (opcodes %))) s)))))))
+                (map-indexed (partial expand-arg max-vars seq-length) 
+                     (map #(cons (first %) (:args (opcodes (first %)))) s))))))
+
+(is (= '({:vars 1, :length 3, :code ((:iconst_4) (:goto -1) (:ireturn)) :jumps {1 0}} {:vars 1, :length 3, :code ((:iconst_4) (:goto 1) (:ireturn))  :jumps {1 2}})
+    (expand-opcodes 1 '((:iconst_4) (:goto) (:ireturn)))))
 
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
