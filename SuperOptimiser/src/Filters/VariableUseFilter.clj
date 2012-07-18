@@ -42,12 +42,13 @@
   [nv fail-trailing-writes l]
   (let [initial-hash (into {} (map #(assoc {} (identity %) :write) (range 0 nv)))]
     (loop [head l last-op initial-hash]
-      (let [op_args (first head) op (first op_args) vm-update (update-varmap op_args)]
-	      (cond
+      (let [op_args (first head) op (first op_args) arg (second op_args) vm-update (update-varmap op_args)]
+        (cond
          (empty? head) (if fail-trailing-writes (no-trailing-writes? last-op) true)
          
          ; If we've hit a jump, all bets are off... let this one through
-         (is-jump? op) true
+         (is-jump? op) (if (and (= op :goto) (> arg 0)) (recur (nthrest head arg) last-op)
+                         true)
          
          ; If we're reading from, a variable which has never been written, fail the sequence
          
@@ -97,3 +98,15 @@
 (is (= false (uses-vars-ok? 0 true '((:istore_0) (:iload_1) (:istore_0)))))
 (is (= true (uses-vars-ok? 1 true '((:iload_0)))))
 (is (= false (uses-vars-ok? 1 true '((:bipush) (:iload_3) (:ireturn)))))
+
+; Some unit tests for branching instructions, to test two rules:
+; If we hit a branch and it's a :goto forwards, continue from that point
+
+(is (= true (uses-vars-ok? 1 false '((:iload_0) (:ineg) (:goto 2) (:istore_0) (:istore_0) (:ireturn)))))
+(is (= false (uses-vars-ok? 1 true '((:iload_0) (:ineg) (:goto 2) (:istore_0) (:istore_0) (:istore_0) (:ireturn)))))
+(is (= true (uses-vars-ok? 1 false '((:iload_0) (:ineg) (:goto 3) (:istore_0) (:istore_0) (:istore_0) (:ireturn)))))
+
+; Otherwise just give up and say "this is OK"
+
+(is (= true (uses-vars-ok? 1 true '((:iload_0) (:ineg) (:goto -1) (:istore_0) (:istore_0) (:istore_0) (:ireturn)))))
+(is (= true (uses-vars-ok? 1 true '((:iload_0) (:ineg) (:ifeq 2) (:istore_0) (:istore_0) (:istore_0) (:ireturn)))))
