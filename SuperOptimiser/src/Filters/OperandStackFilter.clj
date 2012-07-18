@@ -15,7 +15,11 @@
   (loop [stack-size 0 op-head l]
     (let [cur-op (first op-head) opcode (first cur-op) next (rest op-head)]
       (cond
+        ; hit a jump? all bets are off, presume we're OK
+        (is-jump? opcode) true
+
         (> (:opstack-needs (opcode opcodes)) stack-size) false
+        
         (empty? next) true
         :else (recur (+ stack-size (:opstack-effect (opcode opcodes))) next)))))
 
@@ -26,4 +30,5 @@
 (is (= true (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor)))))
 (is (= true (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:ireturn)))))
 (is (= false (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:ixor)))))
+(is (= true (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:goto) (:ixor)))))
 (is (= false (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:iinc) (:ixor) (:ixor)))))
