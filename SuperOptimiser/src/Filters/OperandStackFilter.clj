@@ -15,10 +15,11 @@
   (loop [stack-size 0 op-head l]
     (let [cur-op (first op-head) opcode (first cur-op) next (rest op-head)]
       (cond
-        ; hit a jump? all bets are off, presume we're OK
-        (is-jump? opcode) true
 
         (> (:opstack-needs (opcode opcodes)) stack-size) false
+
+        ; hit a jump? all bets are off, presume we're OK
+        (is-jump? opcode) true
         
         (empty? next) true
         :else (recur (+ stack-size (:opstack-effect (opcode opcodes))) next)))))
