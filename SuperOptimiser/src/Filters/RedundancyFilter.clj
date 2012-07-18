@@ -31,6 +31,15 @@
                                  (interleave (keys (:vars state-map)) (repeatedly #(vector :var (swap! i inc))))))
          :max-var (+ 4 (:max-var state-map))))
 
+
+(defn constant?
+  "Is this entry from the stack a constant?"
+  [e]
+  (if (vector? e) (if (= :constant (first e)) true false) false))
+
+(is (= true (constant? '[:constant 0])))
+(is (= false (constant? '[:calc 0])))
+
 ; When we add a state 
 
 (defn add-state
@@ -78,7 +87,12 @@
       :istore_2 (assoc state-map :stack (rest stack) :vars (assoc vars 2 (first stack)))
       :istore_3 (assoc state-map :stack (rest stack) :vars (assoc vars 3 (first stack)))
 
-      :ineg (inc-max :max-calc (assoc state-map :stack (cons [:calc (:max-calc state-map)] (rest stack))))
+      ; if the top item on the stack is a constant... make it into a new constant
+      ; Otherwise do a new calculation
+      :ineg (if (constant? (first (:stack state-map)))
+              (inc-max :max-const (assoc state-map :stack (cons [:constant (:max-const state-map)] (rest stack))))
+              (inc-max :max-calc (assoc state-map :stack (cons [:calc (:max-calc state-map)] (rest stack)))))
+      
       :ireturn (assoc state-map :stack (rest stack))
       :iinc (inc-all-vars state-map)
 
@@ -95,6 +109,8 @@
 (is (=
       '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
       (add-state (init-state 1) :bipush)))
+
+
 
 (is (= '{:stack ([:constant 0] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
        (add-state (add-state (init-state 1) :bipush) :dup)))
@@ -183,6 +199,20 @@
         '{:stack ([:constant 6]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 [:arg-0] 1 nil 2 nil 3 nil}}
         :iinc)))
 
+(is (=
+      '{:stack ([:constant 1]), :max-var 1, :max-const 2, :max-calc 0, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :ineg)))
+
+(is (=
+      '{:stack ([:calc 1]), :max-var 1, :max-const 1, :max-calc 2, :vars {0 :arg-0 1, nil, 2 nil, 3 nil}}
+      (add-state
+        '{:stack ([:calc 0]), :max-var 1, :max-const 1, :max-calc 1, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
+        :ineg)))
+
+
+
 (defn state-recurred?
   "Has cur-state ever occurred before, in the list of states supplied as past-states?"
   [cur-state past-states]
@@ -204,11 +234,17 @@
   [num-args s]
   (loop [remainder s cur-state (init-state num-args) past-states '()]
     (let [cur-op (first (first remainder))]
+
       (cond
         (empty? remainder) true
         
-        ; Found a branching instruction? All bets are off then
-        (is-jump? cur-op) true 
+        ; Found a branching instruction? If we're making a conditional branch based on 
+        ; a constant at the top of the stack... fail, this is redundant and could be
+        ; replaced by a GOTO. On the other hand, if we're not then all bets are off
+        ; from here on, so return true
+        
+        (is-conditional-jump? cur-op) (if (constant? (first (:stack cur-state))) false true) 
+        (= cur-op :goto) true
         (state-recurred? cur-state past-states) false
         :else
         (recur (rest remainder) (add-state cur-state cur-op) (cons cur-state past-states))))))
@@ -220,3 +256,9 @@
 (is (= false (no-redundancy? 1 '((:iload_0) (:iconst_1) (:iadd) (:pop) (:ireturn)))))
 (is (= false (no-redundancy? 1 '((:iload_0) (:iconst_1) (:istore_1) (:iload_1) (:pop) (:ireturn)))))
 (is (= false (no-redundancy? 1 '((:iload_0) (:istore_0) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:bipush) (:ifeq) (:ireturn)))))
+(is (= true (no-redundancy? 1 '((:iload_0) (:bipush) (:goto) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:bipush) (:dup) (:ifeq) (:ireturn)))))
+(is (= false (no-redundancy? 1 '((:iload_0) (:bipush) (:dup) (:pop) (:ifeq) (:ireturn)))))
+
+
