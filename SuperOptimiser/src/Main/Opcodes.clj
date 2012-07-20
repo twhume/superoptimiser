@@ -52,7 +52,6 @@
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
   [n s]
   (and
-    true
     (finishes-ireturn? s)
     (uses-vars-ok? n true s)
     (uses-operand-stack-ok? s)
@@ -65,7 +64,6 @@
   "Master fertility filter: returns true if any children of this opcode sequence s with n arguments may be valid"
   [n s]
   (and
-    true
     (no-ireturn? s)
     (uses-vars-ok? n false s)
     (uses-operand-stack-ok? s)
