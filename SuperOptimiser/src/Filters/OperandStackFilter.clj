@@ -19,7 +19,7 @@
         (> (:opstack-needs (opcode opcodes)) stack-size) false
 
         ; hit a jump? all bets are off, presume we're OK
-        (is-jump? opcode) true
+        (:jump (opcode opcodes)) true
         
         (empty? next) true
         :else (recur (+ stack-size (:opstack-effect (opcode opcodes))) next)))))

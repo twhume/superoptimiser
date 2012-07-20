@@ -42,7 +42,7 @@
     
     ; Look up any label node from the labels map passed in
     (is-a-label? op) (get labels opcode) 
-    (is-jump? opcode) (new JumpInsnNode ((opcodes opcode) :opcode) ((first args) labels))
+    (:jump (opcode opcodes)) (new JumpInsnNode ((opcodes opcode) :opcode) ((first args) labels))
     
     (nil? ((opcodes opcode) :args)) (new InsnNode ((opcodes opcode) :opcode))
     :else nil)))

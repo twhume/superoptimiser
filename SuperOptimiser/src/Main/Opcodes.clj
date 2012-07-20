@@ -95,12 +95,12 @@
 (defn list-jumps
   "Examine the sequence of opcodes o passed in for jump operations, and return a map of start -> dest for them"
   [o]
-  (loop [remainder o jump-map (sorted-map) pos 0]
-    (let [cur (first remainder) cur-op (first cur) cur-arg (second cur)] 
+  (loop [remainder o jump-map {} pos 0]
       (if (empty? remainder) jump-map
-        (if (is-jump? cur-op)
-          (recur (rest remainder) (assoc jump-map pos (+ pos cur-arg)) (inc pos))
-          (recur (rest remainder) jump-map (inc pos)))))))
+        (let [cur (first remainder)] 
+          (recur (rest remainder)
+                 (if (:jump ((first cur) opcodes)) (assoc jump-map pos (+ pos (second cur))) jump-map)
+                 (inc pos))))))
 
 (is (= {1 0} (list-jumps '((:iload_0) (:goto -1) (:ireturn)))))
 (is (= {1 2} (list-jumps '((:iload_0) (:goto 1) (:ireturn)))))
@@ -131,10 +131,10 @@
 (defn expand-opcodes
   "Take a sequence of opcodes s and expand the variables within it, returning all possibilities, presuming m arguments"
   [m s]
-  (let [seq-length (count s) max-vars (+ m (count-storage-ops s))]
+  (let [seq-length (count s) max-vars (+ m (count-storage-ops s)) indexing-fn (partial expand-arg max-vars seq-length)]
     (map #(hash-map :length seq-length :vars max-vars :code % :jumps (list-jumps %))
               (apply cartesian-product
-                (map-indexed (partial expand-arg max-vars seq-length) 
+                (map-indexed indexing-fn
                      (map #(cons (first %) (:args (opcodes (first %)))) s))))))
 
 (defn expanded-numbered-opcode-sequence

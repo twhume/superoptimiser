@@ -52,19 +52,19 @@
               ; branching
               
               :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0 :jump true}
-              :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true}
-              :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true}
-              :if_icmplt  {:opcode 161 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true}
-              :if_icmpge  {:opcode 162 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true};
-              :if_icmpgt  {:opcode 163 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true}
-              :if_icmple  {:opcode 164 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true}
+              :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
+              :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
+              :if_icmplt  {:opcode 161 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
+              :if_icmpge  {:opcode 162 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true};
+              :if_icmpgt  {:opcode 163 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
+              :if_icmple  {:opcode 164 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
 
-              :ifeq {:opcode 153 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true}
-              :ifne {:opcode 154 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true}
-              :iflt {:opcode 155 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true}
-              :ifge {:opcode 156 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true}
-              :ifgt {:opcode 157 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true}
-              :ifle {:opcode 158 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true}
+              :ifeq {:opcode 153 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
+              :ifne {:opcode 154 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
+              :iflt {:opcode 155 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
+              :ifge {:opcode 156 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
+              :ifgt {:opcode 157 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
+              :ifle {:opcode 158 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
 
               :iinc {:opcode 132 :args [:local-var, :s-byte] :opstack-needs 0 :opstack-effect 0}
 ;              :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
@@ -94,17 +94,3 @@
 
 					  
   )
-
-(defn is-conditional-jump?
-  "Is the operation passed in one which triggers a jump based on the top element of the stack?"
-  [op]
-  (and 
-    (:jump (op opcodes))
-    (not (= op :goto))))
-
-(defn is-jump?
-  "Is the operation passed in one which triggers a jump?"
-  [op]
-    (:jump (op opcodes)))
-
-

@@ -169,7 +169,7 @@
         (= :ireturn op) (has-influence? nv (first (:stack infl-map)))
 
         ; Hit a branch? All bets are off, but check we at least have one ILOAD per argument
-        (is-jump? op) (contains-enough-iloads? nv l)
+        (:jump (op opcodes)) (contains-enough-iloads? nv l)
 
         :else (do
                 (println "Unhandled operation" op)

@@ -47,7 +47,7 @@
          (empty? head) (if fail-trailing-writes (no-trailing-writes? last-op) true)
          
          ; If we've hit a jump, all bets are off... let this one through
-         (is-jump? op) true
+         (:jump (op opcodes)) true
          
          ; If we're reading from, a variable which has never been written, fail the sequence
          

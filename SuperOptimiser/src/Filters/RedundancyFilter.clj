@@ -243,7 +243,7 @@
         ; replaced by a GOTO. On the other hand, if we're not then all bets are off
         ; from here on, so return true
         
-        (is-conditional-jump? cur-op) (if (constant? (first (:stack cur-state))) false true) 
+        (:cjump (cur-op opcodes)) (if (constant? (first (:stack cur-state))) false true) 
         (= cur-op :goto) true
         (state-recurred? cur-state past-states) false
         :else
