@@ -18,9 +18,7 @@
 (defn is-a-label?
   "Is the keyword in the sequence passed in a label?"
   [op]
-  (if (re-find #"^label_" (name (first op)))
-    true
-    false))
+  (.startsWith (name (first op)) "label_"))
 
 (defn add-opcode
   "Creates a child of an AbstractInsNode and returns it"
@@ -41,12 +39,12 @@
     (= :bipush opcode) (new IntInsnNode 16 (first args)) 
     
     ; Look up any label node from the labels map passed in
-    (is-a-label? op) (get labels opcode) 
+    (.startsWith (name opcode) "label_") (get labels opcode) 
     (:jump (opcode opcodes)) (new JumpInsnNode ((opcodes opcode) :opcode) ((first args) labels))
     
     (nil? ((opcodes opcode) :args)) (new InsnNode ((opcodes opcode) :opcode))
     :else nil)))
-
+    
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
   [insnlist ocs labels]
