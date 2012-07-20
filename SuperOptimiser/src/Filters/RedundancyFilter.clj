@@ -218,9 +218,6 @@
   [cur-state past-states]
   (loop [states-remainder past-states]
     (let [examined-state (first states-remainder)]
-;	    (println "Current state=" cur-state)
-;	    (println "Examined state=" examined-state)
-;	    (println "-----------------")
 	    (cond
 	      (empty? examined-state) false
 	      (and
