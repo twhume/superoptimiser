@@ -137,9 +137,6 @@
                 (map-indexed (partial expand-arg max-vars seq-length) 
                      (map #(cons (first %) (:args (opcodes (first %)))) s))))))
 
-(is (= '({:vars 1, :length 3, :code ((:iconst_4) (:goto -1) (:ireturn)) :jumps {1 0}} {:vars 1, :length 3, :code ((:iconst_4) (:goto 1) (:ireturn))  :jumps {1 2}})
-    (expand-opcodes 1 '((:iconst_4) (:goto) (:ireturn)))))
-
 (defn expanded-numbered-opcode-sequence
   "Return a numbered, expanded sequence of all valid opcode permutations of length n presuming m arguments"
   [n m]
