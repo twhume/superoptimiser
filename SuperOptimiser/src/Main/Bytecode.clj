@@ -24,26 +24,30 @@
   "Creates a child of an AbstractInsNode and returns it"
   [op labels & argseq]
   (let [args (flatten argseq) opcode (first op)]
-  (cond
-    (= :istore opcode) (new VarInsnNode 54 (first args))
-    (= :istore_0 opcode) (new VarInsnNode 54 0)
-    (= :istore_1 opcode) (new VarInsnNode 54 1)
-    (= :istore_2 opcode) (new VarInsnNode 54 2)
-    (= :istore_3 opcode) (new VarInsnNode 54 3)
-    (= :iload opcode) (new VarInsnNode 21 (first args))
-    (= :iload_0 opcode) (new VarInsnNode 21 0)
-    (= :iload_1 opcode) (new VarInsnNode 21 1)
-    (= :iload_2 opcode) (new VarInsnNode 21 2)
-    (= :iload_3 opcode) (new VarInsnNode 21 3)
-    (= :iinc opcode) (new IincInsnNode (first args) (second args)) 
-    (= :bipush opcode) (new IntInsnNode 16 (first args)) 
+
+  (if (:jump (opcode opcodes)) (new JumpInsnNode ((opcodes opcode) :opcode) ((first args) labels))
     
     ; Look up any label node from the labels map passed in
-    (.startsWith (name opcode) "label_") (get labels opcode) 
-    (:jump (opcode opcodes)) (new JumpInsnNode ((opcodes opcode) :opcode) ((first args) labels))
+
+    (if (is-a-label? op) (get labels opcode)
+		  (or
+	      (case opcode
+	          :istore (new VarInsnNode 54 (first args))
+	          :istore_0 (new VarInsnNode 54 0)
+	          :istore_1 (new VarInsnNode 54 1)
+	          :istore_2 (new VarInsnNode 54 2)
+	          :istore_3 (new VarInsnNode 54 3)
+	          :iload (new VarInsnNode 21 (first args))
+	          :iload_0 (new VarInsnNode 21 0)
+	          :iload_1 (new VarInsnNode 21 1)
+	          :iload_2 (new VarInsnNode 21 2)
+	          :iload_3 (new VarInsnNode 21 3)
+	          :iinc (new IincInsnNode (first args) (second args)) 
+	          :bipush (new IntInsnNode 16 (first args)) 
+	          nil)
+       (if (nil? ((opcodes opcode) :args)) (new InsnNode ((opcodes opcode) :opcode))))))))
     
-    (nil? ((opcodes opcode) :args)) (new InsnNode ((opcodes opcode) :opcode))
-    :else nil)))
+    
     
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
@@ -81,13 +85,6 @@
 (is (= '((:a) (:b) (:c) (:1) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 3)))
 (is (= '((:a) (:b) (:1) (:c) (:d) (:e)) (insert-at '((:a) (:b) (:c) (:d) (:e)) '(:1) 2)))
  
-(defn calc-offset
-  "How many jumps starting on or before s that have their destination before d are there in list jl?"
-  [s d jl]
-  (println s d jl)
-  (reduce #(if (and (<= %2 s) (<= (get jl %2) d)) (inc %1) (identity %1)) 0 (keys jl)))
-
-
 (defn labels-inserted-before
   "How many of the jumps in the map jl have a src node before max-jump-src and insert a label before node?"
   [max-jump-src node jl]
