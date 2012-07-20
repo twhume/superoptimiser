@@ -11,18 +11,18 @@
   "Takes a sequence starting with an opcode and followed by arguments, returns nil or an updated key/value pair for a hash"
   [s]
   (let [op (first s)]
-	  (cond
-	    (= op :iload_0) '(0 :read)
-	    (= op :iload_1) '(1 :read)
-	    (= op :iload_2) '(2 :read)
-	    (= op :iload_3) '(3 :read)
-      (= op :iload) (seq [(nth s 1) :read])
-	    (= op :istore_0) '(0 :write)
-	    (= op :istore_1) '(1 :write)
-	    (= op :istore_2) '(2 :write)
-	    (= op :istore_3) '(3 :write)
-      (= op :istore) (seq [(nth s 1) :write])
-      :else nil)))
+	  (case op
+	    :iload_0 '(0 :read)
+	    :iload_1 '(1 :read)
+	    :iload_2 '(2 :read)
+	    :iload_3 '(3 :read)
+      	:iload (seq [(nth s 1) :read])
+	    :istore_0 '(0 :write)
+	    :istore_1 '(1 :write)
+	    :istore_2 '(2 :write)
+	    :istore_3 '(3 :write)
+      :istore (seq [(nth s 1) :write])
+      nil)))
 
 (is (= '(0 :write) (update-varmap '[:istore_0])))
 (is (= '(3 :read) (update-varmap '[:iload_3])))
