@@ -61,7 +61,7 @@
       (println "Exception" e (:code class))
       false)
     (catch VerifyError e
-      ; ignore VerifyErrors
+	  ; ignore VerifyErrors
       false)
     (catch Error e
       (println "Error" e  (:code class))
