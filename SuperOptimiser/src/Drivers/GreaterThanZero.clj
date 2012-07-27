@@ -3,8 +3,12 @@
 
 ; Superoptimises a function which returns 1 if the argument is greater than zero, 0 otherwise
 ;
-; An optimal sequence for this would be
-; ILOAD_0 IFLTE
+; A hand-coded sequence for this would be
+; ILOAD_0
+; ICONST_1
+; IFGT 2
+; ICONST_0
+; IRETURN
 
 ; Basic details of the class: class name, method name, method signature
 
@@ -29,4 +33,4 @@
 
 (time 
   (doall
-    (superoptimise-pmap 4 class-name method-name method-signature eq-tests-filter)))
+    (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))
