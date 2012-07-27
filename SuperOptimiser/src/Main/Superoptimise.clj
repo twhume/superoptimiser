@@ -57,10 +57,14 @@
     (do (if (= 0 (mod num 25000)) (println num)))
     (try
       (every? #(% (:class class)) tests)
+    (catch ArithmeticException e
+      ; ignore these. We get so many they don't help us.
+      false)
     (catch Exception e
       (println "Exception" e (:code class))
       false)
     (catch VerifyError e
+      (println "VerifyError" e (:code class))
 	  ; ignore VerifyErrors
       false)
     (catch Error e
