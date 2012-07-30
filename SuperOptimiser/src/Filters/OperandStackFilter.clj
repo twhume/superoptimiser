@@ -18,8 +18,10 @@
 
         (> (:opstack-needs (opcode opcodes)) stack-size) false
 
-        ; hit a jump? all bets are off, presume we're OK
-        (:jump (opcode opcodes)) true
+        ; hit a jump? We used to presume all bets are off here; but now I follow straight through, so at least one path is tested
+        ; In Opcodes/branches-respect-stack-height? a separate test checks that branch destinations and fall-throughs have the same
+        ; stack size, so this should be safe.
+;        (:jump (opcode opcodes)) true
         
         (empty? next) true
         :else (recur (+ stack-size (:opstack-effect (opcode opcodes))) next)))))
