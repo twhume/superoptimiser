@@ -50,8 +50,8 @@
               :idiv {:opcode 108 :opstack-needs 2 :opstack-effect -1}
               
               ; branching
-              
-              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0 :jump true}
+ ; In programs of the size              
+;              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0 :jump true}
               :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
               :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
               :if_icmplt  {:opcode 161 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
