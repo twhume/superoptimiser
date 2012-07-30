@@ -179,7 +179,7 @@
 (is (= true (retains-influence? 1 '((:iload_0) (:ireturn)))))
 (is (= false (retains-influence? 1 '((:bipush) (:ireturn)))))
 (is (= false (retains-influence? 1 '((:iload_0) (:bipush) (:ireturn)))))
-(is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:goto) (:ireturn)))))
+(is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:ifle) (:ireturn)))))
 (is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:pop) (:ireturn)))))
 (is (= true (retains-influence? 1 '((:iload_0) (:bipush) (:pop) (:ineg) (:ireturn)))))
 (is (= true (retains-influence? 1 '((:iload_0) (:dup) (:pop) (:ineg) (:ireturn)))))

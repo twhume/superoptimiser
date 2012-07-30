@@ -46,8 +46,9 @@
         (cond
          (empty? head) (if fail-trailing-writes (no-trailing-writes? last-op) true)
          
-         ; If we've hit a jump, all bets are off... let this one through
-         (:jump (op opcodes)) true
+         ; We used to take the view that all bets were off on hitting a jump. Now we let jumps carry through,
+         ; on the basis that we're at least testing one path that way...
+         ;(:jump (op opcodes)) true
          
          ; If we're reading from, a variable which has never been written, fail the sequence
          
@@ -98,7 +99,3 @@
 (is (= true (uses-vars-ok? 1 true '((:iload_0)))))
 (is (= false (uses-vars-ok? 1 true '((:bipush) (:iload_3) (:ireturn)))))
 
-; Some unit tests for branching instructions, to test the rule: just give up and say "this is OK"
-
-(is (= true (uses-vars-ok? 1 true '((:iload_0) (:ineg) (:goto) (:istore_0) (:istore_0) (:istore_0) (:ireturn)))))
-(is (= true (uses-vars-ok? 1 true '((:iload_0) (:ineg) (:ifeq) (:istore_0) (:istore_0) (:istore_0) (:ireturn)))))

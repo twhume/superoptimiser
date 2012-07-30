@@ -33,5 +33,5 @@
 (is (= true (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor)))))
 (is (= true (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:ireturn)))))
 (is (= false (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:ixor)))))
-(is (= true (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:goto) (:ixor)))))
+(is (= false (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:ixor) (:ifle) (:ixor)))))
 (is (= false (uses-operand-stack-ok? '((:iload_0) (:iload_0) (:iinc) (:ixor) (:ixor)))))

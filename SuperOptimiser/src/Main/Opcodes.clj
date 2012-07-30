@@ -100,12 +100,12 @@
                  (if (:jump ((first cur) opcodes)) (assoc jump-map pos (+ pos (second cur))) jump-map)
                  (inc pos))))))
 
-(is (= {1 0} (list-jumps '((:iload_0) (:goto -1) (:ireturn)))))
-(is (= {1 2} (list-jumps '((:iload_0) (:goto 1) (:ireturn)))))
-(is (= {1 0 2 0} (list-jumps '((:iload_0) (:goto -1) (:goto -2) (:ireturn)))))
-(is (= {1 0 2 3} (list-jumps '((:iload_0) (:goto -1) (:goto 1) (:ireturn)))))
-(is (= {1 2 2 0} (list-jumps '((:iload_0) (:goto 1) (:goto -2) (:ireturn)))))
-(is (= {1 3 2 3} (list-jumps '((:iload_0) (:goto 2) (:goto 1) (:ireturn)))))
+(is (= {1 0} (list-jumps '((:iload_0) (:ifle -1) (:ireturn)))))
+(is (= {1 2} (list-jumps '((:iload_0) (:ifle 1) (:ireturn)))))
+(is (= {1 0 2 0} (list-jumps '((:iload_0) (:ifle -1) (:ifle -2) (:ireturn)))))
+(is (= {1 0 2 3} (list-jumps '((:iload_0) (:ifle -1) (:ifle 1) (:ireturn)))))
+(is (= {1 2 2 0} (list-jumps '((:iload_0) (:ifle 1) (:ifle -2) (:ireturn)))))
+(is (= {1 3 2 3} (list-jumps '((:iload_0) (:ifle 2) (:ifle 1) (:ireturn)))))
 
 (defn expand-single-arg
   "Expand a single argument to an opcode into all of its possibilities"
