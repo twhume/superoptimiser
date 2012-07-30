@@ -10,11 +10,11 @@
       method-name "neg"
       method-signature "(I)I"
       eq-tests-filter [
-                       (defn zero-untouched? [i]  (= 0 (invoke-method i method-name 0)))
-                       (defn one-to-minus-one? [i]  (= -1 (invoke-method i method-name 1)))
-                       (defn minus-one-to-one? [i]  (= 1 (invoke-method i method-name -1)))
-                       (defn large-positive? [i]  (= -123212 (invoke-method i method-name 123212)))
-                       (defn large-negative? [i]  (= 987349 (invoke-method i method-name -987349)))
+                       (fn zero-untouched? [i]  (= 0 (invoke-method i method-name 0)))
+                       (fn one-to-minus-one? [i]  (= -1 (invoke-method i method-name 1)))
+                       (fn minus-one-to-one? [i]  (= 1 (invoke-method i method-name -1)))
+                       (fn large-positive? [i]  (= -123212 (invoke-method i method-name 123212)))
+                       (fn large-negative? [i]  (= 987349 (invoke-method i method-name -987349)))
                        ]]
   (time 
     (doall
