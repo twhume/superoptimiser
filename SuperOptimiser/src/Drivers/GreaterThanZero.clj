@@ -31,6 +31,7 @@
 
 (def eq-tests-filter [odd-larger? handles-zero? even-smaller? even-larger? odd-smaller? large-odd-larger? large-even-larger? large-odd-smaller? large-even-smaller?])
 
-(time 
-  (doall
-    (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))
+(defn -main []
+	(time 
+	  (doall
+	    (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter))))

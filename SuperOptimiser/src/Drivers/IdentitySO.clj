@@ -21,4 +21,5 @@
 
 (def eq-tests-filter [minint-is-minint? minus-one-is-minus-one? maxint-is-maxint? one-is-one? zero-is-zero? one-is-not-zero? one-is-not-minus-one?])
 
-(time (doall (superoptimise-pmap 2 class-name method-name method-signature eq-tests-filter)))
+(defn -main []
+  (time (doall (superoptimise-pmap 2 class-name method-name method-signature eq-tests-filter))))
