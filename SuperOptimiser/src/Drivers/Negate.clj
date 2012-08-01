@@ -16,6 +16,7 @@
                        (fn large-positive? [i]  (= -123212 (invoke-method i method-name 123212)))
                        (fn large-negative? [i]  (= 987349 (invoke-method i method-name -987349)))
                        ]]
-  (time 
-    (doall
-      (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter))))
+  	(defn -main []
+     (time
+       (doall
+         (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter)))))
