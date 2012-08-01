@@ -10,7 +10,6 @@
 ; INEG
 ; IRETURN
 
-
 (let [class-name "AbsTest"
       method-name "abs"
       method-signature "(I)I"
@@ -23,7 +22,7 @@
                        ]]
   
   
-
+(defn -main []
   (time
     (doall
-      (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter))))
+      (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter)))))
