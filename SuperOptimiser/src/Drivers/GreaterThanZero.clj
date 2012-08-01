@@ -23,10 +23,10 @@
 (defn large-odd-larger? [i]  (= 1 (invoke-method i method-name 123563)))
 (defn large-even-larger? [i]  (= 1 (invoke-method i method-name 123212)))
 (defn handles-zero? [i]  (= 0 (invoke-method i method-name 0)))
-(defn odd-smaller? [i]  (= 1 (invoke-method i method-name -5)))
-(defn even-smaller? [i]  (= 1 (invoke-method i method-name -8)))
-(defn large-odd-smaller? [i]  (= 1 (invoke-method i method-name -98629)))
-(defn large-even-smaller? [i]  (= 1 (invoke-method i method-name -68222)))
+(defn odd-smaller? [i]  (= 0 (invoke-method i method-name -5)))
+(defn even-smaller? [i]  (= 0 (invoke-method i method-name -8)))
+(defn large-odd-smaller? [i]  (= 0 (invoke-method i method-name -98629)))
+(defn large-even-smaller? [i]  (= 0 (invoke-method i method-name -68222)))
 
 
 (def eq-tests-filter [odd-larger? handles-zero? even-smaller? even-larger? odd-smaller? large-odd-larger? large-even-larger? large-odd-smaller? large-even-smaller?])
