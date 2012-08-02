@@ -65,11 +65,12 @@
   "Master fertility filter: returns true if any children of this opcode sequence s with n arguments may be valid"
   [n s]
   (and
+    (uses-operand-stack-ok? s)
+
+    (no-redundancy? n s)
     (no-ireturn? s)
     (uses-vars-ok? n false s)
-    (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
-    (no-redundancy? n s)
 ))
 
 (defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
