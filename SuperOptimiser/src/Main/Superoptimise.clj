@@ -77,11 +77,3 @@
   (pfilter (partial check-passes tests c-root m-name m-sig)
               (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))
 
-; ---- Parallelised implementation below ----
-
-(defn make-classes
-  "Takes a sequence s, maps all its entries into classes"
-  [c-root m-name m-sig tests s]
- (filter (partial check-passes tests) (map #(assoc % :class (get-class %  c-root m-name m-sig)) s))
-)
-
