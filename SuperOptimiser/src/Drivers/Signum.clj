@@ -18,5 +18,5 @@
   	(defn -main []
      (time
        (doall
-         (superoptimise-pmap 4 class-name method-name method-signature eq-tests-filter)))))
+         (superoptimise-slice 6 class-name method-name method-signature eq-tests-filter 2 0)))))
 

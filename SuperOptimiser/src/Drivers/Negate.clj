@@ -6,7 +6,7 @@
 ; An optimal sequence for this would be
 ; ILOAD_0 INEG IRETURN
 
-(let [class-name "NegateTest"
+(let [class-name "Negate"
       method-name "neg"
       method-signature "(I)I"
       eq-tests-filter [
@@ -18,5 +18,5 @@
                        ]]
   	(defn -main []
      (time
-       (doall
-         (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter)))))
+          (doall
+            (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter)))))
