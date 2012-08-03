@@ -1,4 +1,5 @@
 (ns Main.Superoptimise
+  (:use [clojure.tools.logging :only (info)])
   (:import (java.util.concurrent TimeoutException TimeUnit FutureTask)))
 (import 'clojure.lang.Reflector)
 (use 'Main.Bytecode)
@@ -74,6 +75,15 @@
 (defn superoptimise-pmap
   "Main driver function for the SuperOptimiser - using pmap"
   [seq-len c-root m-name m-sig tests]
-  (pfilter (partial check-passes tests c-root m-name m-sig)
-              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig))))
+  (map #(info (str "PASS " c-root "." m-name " " %)) 
+       (pfilter (partial check-passes tests c-root m-name m-sig)
+              (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
+(defn superoptimise-slice
+  "Main driver function for the SuperOptimiser - using pmap"
+  [seq-len c-root m-name m-sig tests num-nodes node-num]
+  (map #(info (str "PASS " c-root "." m-name " " %)) 
+       (pfilter (partial check-passes tests c-root m-name m-sig)
+                (take-nth num-nodes
+                          (drop node-num
+                                (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))))
