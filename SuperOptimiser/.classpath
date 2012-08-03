@@ -9,5 +9,8 @@
 	<classpathentry kind="lib" path="lib/lein-eclipse-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/math.combinatorics-0.0.2.jar"/>
 	<classpathentry kind="lib" path="classes"/>
+	<classpathentry kind="lib" path="lib/tools.logging-0.2.3.jar"/>
+	<classpathentry kind="lib" path="libs/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="libs/syslog4j-0.9.46-bin.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
