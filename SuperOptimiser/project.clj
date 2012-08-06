@@ -4,6 +4,7 @@
                  [org.ow2.asm/asm "4.0"]
                  [org.ow2.asm/asm-tree "4.0"]
                  [lein-eclipse "1.0.0"]
+                 [noir "1.3.0-beta1"]
                  [org.clojure/tools.logging "0.2.3"]
                  [org.clojure/math.combinatorics "0.0.2"]
                  [org.clojure/data.priority-map "0.0.1"]])
