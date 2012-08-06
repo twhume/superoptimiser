@@ -8,7 +8,9 @@
 ; Used to start a server which hands out details of the number of nodes, node ID, and Clojure file to run
 ; Effectively, tells each server which part of the search space to handle
 
-
+; Usage:
+; lein run -m Cluster.Server 3 Drivers.Negate
+; (first argument: number of nodes; second argument: problem to solve)
 
 (defn -main [& args]
   
