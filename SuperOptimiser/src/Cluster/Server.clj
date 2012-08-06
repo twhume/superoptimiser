@@ -4,7 +4,7 @@
 
 (def maxnodes 10)
 (def currentNode (atom -1))
-(def problem "Drivers.Signum")
+(def problem "Drivers.Negate")
 
 ; Used to start a server which hands out details of the number of nodes, node ID, and Clojure file to run
 ; Effectively, tells each server which part of the search space to handle
