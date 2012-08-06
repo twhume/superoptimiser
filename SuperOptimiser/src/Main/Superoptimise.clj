@@ -62,14 +62,14 @@
       ; ignore these. We get so many they don't help us.
       false)
     (catch Exception e
-      (error "Exception" e (:code cmap))
+      (error "Exception" e cmap)
       false)
     (catch VerifyError e
       (error "VerifyError" e cmap)
 	  ; ignore VerifyErrors
       false)
     (catch Error e
-      (error "Error" e  (:code cmap))
+      (error "Error" e  cmap)
       false))))
 
 (defn superoptimise-pmap

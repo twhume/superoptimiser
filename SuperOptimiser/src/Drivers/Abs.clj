@@ -25,7 +25,7 @@
   
 (defn -main []
   (time
-    (doall
+    (dorun
       (superoptimise-pmap 5 class-name method-name method-signature eq-tests-filter))))
 
     (defn run-slice
@@ -34,6 +34,6 @@
       (do
         (info "starting node " cur-node "/" num-nodes)
 	      (time
-	          (doall
+	          (dorun
 	            (superoptimise-slice 5 class-name method-name method-signature eq-tests-filter num-nodes cur-node)))
         (info "finishing node " cur-node "/" num-nodes))))

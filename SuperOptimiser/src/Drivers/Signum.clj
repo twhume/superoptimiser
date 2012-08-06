@@ -18,8 +18,8 @@
                        ]]
   	(defn -main []
      (time
-       (doall
-         (superoptimise-slice 6 class-name method-name method-signature eq-tests-filter 2 0))))
+       (dorun
+         (superoptimise-pmap 6 class-name method-name method-signature eq-tests-filter))))
 
     (defn run-slice
       "Superoptimises a small slice of the overall search space"
@@ -27,6 +27,6 @@
       (do
         (info "starting node " cur-node "/" num-nodes)
 	      (time
-	          (doall
+	          (dorun
 	            (superoptimise-slice 6 class-name method-name method-signature eq-tests-filter num-nodes cur-node)))
         (info "finishing node " cur-node "/" num-nodes))))
