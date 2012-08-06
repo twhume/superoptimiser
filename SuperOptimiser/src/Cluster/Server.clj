@@ -13,6 +13,6 @@
 
 (defpage "/init" []
   (let [next (swap! currentNode inc)]
-    (if (>= next maxnodes) "Done"
-      (str maxnodes "\n" next "\n" problem))))
+    (if (>= next maxnodes) "{}"
+      (str (hash-map :node next :max maxnodes :problem problem)))))
 
