@@ -1,5 +1,5 @@
 (ns Main.Superoptimise
-  (:use [clojure.tools.logging :only (info)])
+  (:use [clojure.tools.logging :only (info error)])
   (:import (java.util.concurrent TimeoutException TimeUnit FutureTask)))
 (import 'clojure.lang.Reflector)
 (use 'Main.Bytecode)
@@ -62,14 +62,14 @@
       ; ignore these. We get so many they don't help us.
       false)
     (catch Exception e
-      (println "Exception" e (:code cmap))
+      (error "Exception" e (:code cmap))
       false)
     (catch VerifyError e
-      (println "VerifyError" e cmap)
+      (error "VerifyError" e cmap)
 	  ; ignore VerifyErrors
       false)
     (catch Error e
-      (println "Error" e  (:code cmap))
+      (error "Error" e  (:code cmap))
       false))))
 
 (defn superoptimise-pmap
