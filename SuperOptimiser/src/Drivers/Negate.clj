@@ -1,4 +1,5 @@
-(ns Drivers.Negate)
+(ns Drivers.Negate
+    (:use [clojure.tools.logging :only (info)]))
 (use 'Main.Superoptimise)
 
 ; Superoptimises a function which negates its argument
@@ -19,4 +20,14 @@
   	(defn -main []
      (time
           (doall
-            (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter)))))
+            (superoptimise-pmap 3 class-name method-name method-signature eq-tests-filter))))
+   
+    (defn run-slice
+      "Superoptimises a small slice of the overall search space"
+      [num-nodes cur-node]
+      (do
+        (info "starting node " cur-node "/" num-nodes)
+	      (time
+	          (doall
+	            (superoptimise-slice 3 class-name method-name method-signature eq-tests-filter num-nodes cur-node)))
+        (info "finishing node " cur-node "/" num-nodes))))
