@@ -1,4 +1,5 @@
-(ns Drivers.Abs)
+(ns Drivers.Abs
+      (:use [clojure.tools.logging :only (info)]))
 (use 'Main.Superoptimise)
 
 ; Superoptimises a function which returns abs(arg)

@@ -1,4 +1,5 @@
-(ns Drivers.Signum)
+(ns Drivers.Signum
+      (:use [clojure.tools.logging :only (info)]))
 (use 'Main.Superoptimise)
 
 ; The daddy: superoptimises the signum() function, as per the original Masselin experiments
