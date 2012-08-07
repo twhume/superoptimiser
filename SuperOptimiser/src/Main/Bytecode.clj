@@ -1,5 +1,5 @@
 (ns Main.Bytecode
-    (:use [clojure.tools.logging :only (info)])
+    (:use [clojure.tools.logging :only (info)]))
 (use 'clojure.test)
 (use 'Main.Global)
 (import '(clojure.lang DynamicClassLoader))
