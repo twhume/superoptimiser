@@ -1,4 +1,5 @@
-(ns Main.Bytecode)
+(ns Main.Bytecode
+    (:use [clojure.tools.logging :only (info)])
 (use 'clojure.test)
 (use 'Main.Global)
 (import '(clojure.lang DynamicClassLoader))
@@ -187,7 +188,7 @@
     (try
       (let [full-class-name (str className "-" seqnum)
             num (swap! class_num inc)]
-        (if (= 0 (mod num 25000)) (println num))
+        (if (= 0 (mod num 1000000)) (info "created class #" num))
         (load-class full-class-name
                     (get-class-bytes classmap full-class-name methodName methodSig)
                     (if (= 0 (mod num 50000)) (swap! classloader instantiate-classloader) @classloader)))
