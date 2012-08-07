@@ -1,4 +1,5 @@
-(ns Drivers.Min)
+(ns Drivers.Min
+        (:use [clojure.tools.logging :only (info)]))
 (use 'Main.Superoptimise)
 
 ; Superoptimises the Min() function

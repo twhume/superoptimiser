@@ -1,4 +1,5 @@
-(ns Drivers.Max)
+(ns Drivers.Max
+        (:use [clojure.tools.logging :only (info)]))
 (use 'Main.Superoptimise)
 
 ; Superoptimises the Max() function
