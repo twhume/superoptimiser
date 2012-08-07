@@ -8,6 +8,8 @@
 
 ; This package handles the creation of Java class files.
 
+(def class_num (atom 0))
+
 (defn instantiate-classloader
   "Returns a new instance of the Class Loader - used to recreate it when necessary"
   [cur]
@@ -183,10 +185,12 @@
   "Creates and loads a class file with the given name"
   [classmap className methodName methodSig seqnum]
     (try
-      (let [full-class-name (str className "-" seqnum)]
+      (let [full-class-name (str className "-" seqnum)
+            num (swap! class_num inc)]
+        (if (= 0 (mod num 25000)) (println num))
         (load-class full-class-name
                     (get-class-bytes classmap full-class-name methodName methodSig)
-                    (if (= 0 (mod seqnum 50000)) (swap! classloader instantiate-classloader) @classloader)))
+                    (if (= 0 (mod num 50000)) (swap! classloader instantiate-classloader) @classloader)))
       (catch ClassFormatError cfe (do
                                     (println cfe)
                                     nil))))
