@@ -7,12 +7,12 @@
       method-name "min"
       method-signature "(II)I"
       eq-tests-filter [
-                       (fn positive-is-bigger? [i]  (= -1 (invoke-method i method-name -1 1)))
-                       (fn positive-is-bigger-revargs? [i]  (= -1 (invoke-method i method-name 1 -1)))
+                       (fn negative-is-smaller? [i]  (= -1 (invoke-method i method-name -1 1)))
+                       (fn negative-is-smaller-revargs? [i]  (= -1 (invoke-method i method-name 1 -1)))
                        (fn greater-than-zero? [i]  (= 0 (invoke-method i method-name 0 1)))
                        (fn greater-than-zero-revargs? [i]  (= 0 (invoke-method i method-name 1 0)))
-                       (fn bigger-is-better? [i]  (= 12345 (invoke-method i method-name 12345 19872)))
-                       (fn bigger-is-better-revargs? [i]  (= 19872 (invoke-method i method-name 20371 19872)))
+                       (fn smaller-is-better? [i]  (= 12345 (invoke-method i method-name 12345 19872)))
+                       (fn smaller-is-better-revargs? [i]  (= 12345 (invoke-method i method-name 19872 12345)))
                        (fn both-negative? [i]  (= -3 (invoke-method i method-name -1 -3)))
                        (fn both-negative-revargs? [i]  (= -3 (invoke-method i method-name -3 -1)))
                        ]]
