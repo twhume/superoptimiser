@@ -20,4 +20,15 @@
 	(defn -main []
 	  (time 
 	    (doall
-	      (superoptimise-pmap 6 class-name method-name method-signature eq-tests-filter)))))
+	      (superoptimise-pmap 6 class-name method-name method-signature eq-tests-filter))))
+
+
+    (defn run-slice
+      "Superoptimises a small slice of the overall search space"
+      [num-nodes cur-node]
+      (do
+        (info "starting node " cur-node "/" num-nodes)
+	      (time
+	          (dorun
+	            (superoptimise-slice 6 class-name method-name method-signature eq-tests-filter num-nodes cur-node)))
+        (info "finishing node " cur-node "/" num-nodes))))
