@@ -8,12 +8,10 @@
 	<classpathentry kind="lib" path="lib/data.priority-map-0.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/lein-eclipse-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/math.combinatorics-0.0.2.jar"/>
-	<classpathentry kind="lib" path="classes"/>
 	<classpathentry kind="lib" path="lib/tools.logging-0.2.3.jar"/>
 	<classpathentry kind="lib" path="libs/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="libs/syslog4j-0.9.46-bin.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/core.incubator-0.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/java.classpath-0.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jbcrypt-0.3m.jar"/>
@@ -27,7 +25,6 @@
 	<classpathentry kind="lib" path="lib/cheshire-2.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/clj-stacktrace-0.2.4.jar"/>
 	<classpathentry kind="lib" path="lib/clout-1.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/compojure-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/hiccup-1.0.0-beta1.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.9.4.jar"/>
@@ -38,5 +35,13 @@
 	<classpathentry kind="lib" path="lib/ring-devel-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/ring-jetty-adapter-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/ring-servlet-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/clj-http-0.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/slingshot-0.10.3.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
