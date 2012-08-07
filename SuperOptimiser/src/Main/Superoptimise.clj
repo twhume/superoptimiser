@@ -47,7 +47,6 @@
   "check if a class passes its equivalence tests"
   [tests class]
   (let [num (:seq-num class)]
-    (do (if (= 0 (mod num 25000)) (println num)))
     (let [test-fn (fn [] (every? #(% (:class class)) tests))]
       (with-timeout num (:code class) test-fn 2000))))
 
@@ -55,7 +54,6 @@
   "check if a class passes its equivalence tests"
   [tests c-root m-name m-sig cmap]
   (let [num (:seq-num cmap) class (get-class cmap c-root m-name m-sig (:seq-num cmap))]
-    (do (if (= 0 (mod num 25000)) (println num)))
     (try
       (every? #(% class) tests)
     (catch ArithmeticException e
@@ -80,7 +78,7 @@
               (expanded-numbered-opcode-sequence seq-len (num-method-args m-sig)))))
 
 (defn superoptimise-slice
-  "Main driver function for the SuperOptimiser - using pmap"
+  "Main driver function for the SuperOptimiser - but just taking a slice of the overall search space"
   [seq-len c-root m-name m-sig tests num-nodes node-num]
   (map #(info (str "PASS " c-root "." m-name " " %)) 
        (pfilter (partial check-passes tests c-root m-name m-sig)
