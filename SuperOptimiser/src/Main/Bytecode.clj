@@ -124,6 +124,11 @@
        (add-labels '((:bipush 1) (:goto -1) (:ireturn)) {1 0})))
 (is (= '((:label_0) (:label_1) (:iload_0) (:goto :label_0) (:goto :label_1) (:ireturn))
        (add-labels '((:iload_0) (:goto -1) (:goto -2) (:ireturn)) {1 0 2 0})))
+(is (= '((:iload_0) (:dup) (:dup) (:dup) (:swap) (:ifgt :label_0) (:iinc 0 0) (:label_0) (:ireturn))
+       (add-labels '((:iload_0) (:dup) (:dup) (:dup) (:swap) (:ifgt 2) (:iinc 0 0) (:ireturn)) {5 7})))
+(is (= '((:iload_0) (:dup) (:dup) (:ifne :label_0) (:swap) (:label_0) (:ifgt :label_1) (:iinc 0 0) (:label_1) (:ireturn))
+       (add-labels '((:iload_0) (:dup) (:dup) (:ifne 2) (:swap) (:ifgt 2) (:iinc 0 0) (:ireturn)) '{3 5 5 7})))
+
 
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"

@@ -105,7 +105,7 @@
 (defn list-jumps
   "Examine the sequence of opcodes o passed in for jump operations, and return a map of start -> dest for them"
   [o]
-  (loop [remainder o jump-map {} pos 0]
+  (loop [remainder o jump-map (sorted-map) pos 0]
       (if (empty? remainder) jump-map
         (let [cur (first remainder)] 
           (recur (rest remainder)
@@ -120,6 +120,17 @@
 (is (= {1 3 2 3} (list-jumps '((:iload_0) (:ifle 2) (:ifle 1) (:ireturn)))))
 
 (defn expand-single-arg
+  "Expand a single argument to an opcode into all of its possibilities"
+  [vars length position op arg]
+  (cond 
+        (= arg :local-var) (range 0 vars)
+        (= arg :s-byte) '(-127 -1 0 1 128)
+        (= arg :us-byte) '(0 256)
+        (= arg :byte) '(0 256)
+        (= arg :branch-dest)  (filter #(not(< % 2)) (map #(- % position) (range 0 length)))
+        :else (seq [(seq [op])])))
+
+(defn expand-single-arg-full
   "Expand a single argument to an opcode into all of its possibilities"
   [vars length position op arg]
   (cond 
@@ -153,6 +164,6 @@
   (map-indexed (fn [idx itm] (assoc itm :seq-num idx))
      (filter branches-respect-stack-height?
            (mapcat identity
-                   (map (partial expand-opcodes m) (opcode-sequence n m))))))
+                   (map (partial expand-opcodes m) (opcode-sequence-new n m))))))
 
 
