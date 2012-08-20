@@ -53,7 +53,7 @@
   "Master validity filter: returns true if this opcode sequence can form the basis of a viable bytecode sequence"
   [n s]
   (and
-;    (finishes-ireturn? s)
+    (finishes-ireturn? s)
     (uses-vars-ok? n true s)
     (uses-operand-stack-ok? s)
     (contains-no-redundant-pairs? s)
@@ -73,22 +73,22 @@
     (contains-no-redundant-pairs? s)
 ))
 
-(defn get-children [n s] 
+(defn get-children-new [n s] 
   (if (empty? s) '([(:iload_0)])
     (if (is-fertile? n s) (map #(conj s (list %)) (keys opcodes)))))
 
-(defn get-children-old [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
+(defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
+
+(defn opcode-sequence-new
+  "Return a sequence of potentially valid opcode sequences N opcodes in length"
+  [max-depth num-args]
+  (let [validity-filter (partial is-valid? num-args) fertile-children (partial get-children-new num-args) depth (dec max-depth)]
+    (filter validity-filter (map #(conj % (list :ireturn)) (rest (tree-seq #(< (count %) depth) fertile-children '[]))))))
 
 (defn opcode-sequence
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
   [max-depth num-args]
-  (let [validity-filter (partial is-valid? num-args) fertile-children (partial get-children num-args) depth (dec max-depth)]
-    (filter validity-filter (map #(conj % (list :ireturn)) (rest (tree-seq #(< (count %) depth) fertile-children '[]))))))
-
-(defn opcode-sequence-old
-  "Return a sequence of potentially valid opcode sequences N opcodes in length"
-  [max-depth num-args]
-  (let [validity-filter (partial is-valid? num-args) fertile-children (partial get-children-old num-args)]
+  (let [validity-filter (partial is-valid? num-args) fertile-children (partial get-children num-args)]
     (filter validity-filter (rest (tree-seq #(< (count %) max-depth) fertile-children '[])))))
 
 (defn count-storage-ops
