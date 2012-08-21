@@ -26,23 +26,24 @@
        (dorun
         (superoptimise-pmap 7 class-name method-name method-signature eq-tests-filter))))
 
-   (defn equivalence-fails?
+   (defn equivalent?
      "Is the class-map passes in equivalence to Integer.signum()?"
      [cm]
      (let [class (get-class cm class-name method-name method-signature (:seq-num cm))]
-	     (loop [num-tests 10000
+	     (loop [num-tests 100000
 	            input 0]
-        (if (= 0 num-tests) false
-          (if (not (= (Integer/signum input)  (invoke-method class method-name input))) true
+        (if (= 0 num-tests) true
+          (if (not (= (Integer/signum input)  (invoke-method class method-name input))) false
             (recur (dec num-tests) (- (quot Integer/MAX_VALUE 2) (rand-int Integer/MAX_VALUE))))))))
  
    (defn check-sequences
      "Takes a list of possible working class-maps, runs a big probabilistic test against each one, and compares to the java.lang.Integer implementation"
      [fns]
      (loop [remainder fns]
-       (if (empty? fns) true
-         (println (equivalence-fails? (first fns)) (first fns))
-           (recur (rest remainder)))))
+       (if (empty? remainder) true
+         (do
+           (println (equivalent? (first remainder)) (first remainder))
+           (recur (rest remainder))))))
    
    
    
