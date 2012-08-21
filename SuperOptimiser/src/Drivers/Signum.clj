@@ -42,7 +42,7 @@
      (loop [remainder fns]
        (if (empty? fns) true
          (println (equivalence-fails? (first fns)) (first fns))
-           (recur (rest remainder))))))
+           (recur (rest remainder)))))
    
    
    
