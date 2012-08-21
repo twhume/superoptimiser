@@ -124,9 +124,9 @@
   [vars length position op arg]
   (cond 
         (= arg :local-var) (range 0 vars)
-        (= arg :s-byte) '(-127 -1 0 1 128)
-        (= arg :us-byte) '(0 256)
-        (= arg :byte) '(0 256)
+        (= arg :s-byte) '(-127 -64 -63 -32 -31 -16 -15 -8 -7 -4 -3 -2 -1 0 1 2 3 4 7 8 15 16 31 32 63 64 127)
+        (= arg :us-byte) '(0 1 2 3 4 7 8 15 16 31 32 63 64 127 128 255)
+        (= arg :byte) '(0 1 2 3 4 7 8 15 16 31 32 63 64 127 128 255)
         (= arg :branch-dest)  (filter #(not(< % 2)) (map #(- % position) (range 0 length)))
         :else (seq [(seq [op])])))
 
