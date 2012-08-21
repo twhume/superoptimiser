@@ -1,6 +1,7 @@
 (ns Drivers.Signum
       (:use [clojure.tools.logging :only (info)]))
 (use 'Main.Superoptimise)
+(use 'Main.Bytecode)
 
 ; The daddy: superoptimises the signum() function, as per the original Masselin experiments
 
@@ -25,6 +26,26 @@
        (dorun
         (superoptimise-pmap 7 class-name method-name method-signature eq-tests-filter))))
 
+   (defn equivalence-fails?
+     "Is the class-map passes in equivalence to Integer.signum()?"
+     [cm]
+     (let [class (get-class cm class-name method-name method-signature (:seq-num cm))]
+	     (loop [num-tests 10000
+	            input 0]
+        (if (= 0 num-tests) false
+          (if (not (= (Integer/signum input)  (invoke-method class method-name input))) true
+            (recur (dec num-tests) (- (quot Integer/MAX_VALUE 2) (rand-int Integer/MAX_VALUE))))))))
+ 
+   (defn check-sequences
+     "Takes a list of possible working class-maps, runs a big probabilistic test against each one, and compares to the java.lang.Integer implementation"
+     [fns]
+     (loop [remainder fns]
+       (if (empty? fns) true
+         (println (equivalence-fails? (first fns)) (first fns))
+           (recur (rest remainder))))))
+   
+   
+   
     (defn run-slice
       "Superoptimises a small slice of the overall search space"
       [num-nodes cur-node]
@@ -32,5 +53,5 @@
         (info "starting node " cur-node "/" num-nodes)
 	      (time
 	          (dorun
-	            (superoptimise-slice 6 class-name method-name method-signature eq-tests-filter num-nodes cur-node)))
+	            (superoptimise-slice 7 class-name method-name method-signature eq-tests-filter num-nodes cur-node)))
         (info "finishing node " cur-node "/" num-nodes))))
