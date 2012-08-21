@@ -66,7 +66,6 @@
   [n s]
   (and
     (uses-operand-stack-ok? s)
-
     (no-redundancy? n s)
     (no-ireturn? s)
     (uses-vars-ok? n false s)
@@ -119,7 +118,11 @@
 (is (= {1 2 2 0} (list-jumps '((:iload_0) (:ifle 1) (:ifle -2) (:ireturn)))))
 (is (= {1 3 2 3} (list-jumps '((:iload_0) (:ifle 2) (:ifle 1) (:ireturn)))))
 
-(defn expand-single-arg
+; The method expand-single-arg-partial can be renamed to substitute for expand-single-arg;
+; it cuts down the overall search space by ensuring we only use specific values when expanding
+; a sequence to include byte arguments
+
+(defn expand-single-arg-partial
   "Expand a single argument to an opcode into all of its possibilities"
   [vars length position op arg]
   (cond 
@@ -130,7 +133,7 @@
         (= arg :branch-dest)  (filter #(not(< % 2)) (map #(- % position) (range 0 length)))
         :else (seq [(seq [op])])))
 
-(defn expand-single-arg-full
+(defn expand-single-arg
   "Expand a single argument to an opcode into all of its possibilities"
   [vars length position op arg]
   (cond 
