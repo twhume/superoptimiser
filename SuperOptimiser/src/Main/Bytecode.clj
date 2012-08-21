@@ -5,7 +5,7 @@
 (import '(clojure.lang DynamicClassLoader))
 (import '(java.io FileOutputStream))
 (import '(org.objectweb.asm ClassWriter Opcodes))
-(import '(org.objectweb.asm.tree  AbstractInsnNode VarInsnNode InsnNode IincInsnNode JumpInsnNode IntInsnNode ClassNode MethodNode InsnList LabelNode))
+(import '(org.objectweb.asm.tree AbstractInsnNode VarInsnNode InsnNode IincInsnNode JumpInsnNode IntInsnNode ClassNode MethodNode InsnList LabelNode))
 
 ; This package handles the creation of Java class files.
 
@@ -50,14 +50,12 @@
 	          nil)
        (if (nil? ((opcodes opcode) :args)) (new InsnNode ((opcodes opcode) :opcode))))))))
     
-    
-    
 (defn add-opcode-and-args
   "Pulls an opcode off the sequence provided, adds it and any arguments to the insnlist, returns the remainder of the sequence"
   [insnlist ocs labels]
   (let [op-tuple (first ocs) op (first op-tuple) num-args (if (is-a-label? op-tuple) 0 (count ((opcodes op) :args)))]
     (. insnlist add (add-opcode op-tuple labels (rest op-tuple)))
-    (rest ocs )))
+    (rest ocs)))
 
 (defn replace-at
   "Create a new sequence consisting of the input sequence s with the item at position p having its argument replaced by i"
@@ -129,7 +127,6 @@
 (is (= '((:iload_0) (:dup) (:dup) (:ifne :label_0) (:swap) (:label_0) (:ifgt :label_1) (:iinc 0 0) (:label_1) (:ireturn))
        (add-labels '((:iload_0) (:dup) (:dup) (:ifne 2) (:swap) (:ifgt 2) (:iinc 0 0) (:ireturn)) '{3 5 5 7})))
 
-
 (defn make-labels-map
   "Take the sequence of opcodes provided and make a map of name to LabelNode, for each label"
   [o]
@@ -158,7 +155,6 @@
 (defn get-class-bytes
   "Creates a Java Class from the supplied data, returns an array of bytes representing that class. Input should be a map containing keys
    :length, :vars and :code, containing the number of opcodes, the max. number of local variables and a list of opcodes and arguments"
-
   [sequence className methodName methodSig]
   (let [cn (new ClassNode)
         cw (new ClassWriter ClassWriter/COMPUTE_MAXS)
@@ -183,9 +179,7 @@
 (defn load-class
   "Load a class of the given name from the given bytecode"
   ([name bytecode cl]
-      (.defineClass cl name bytecode '()))
-  )
-
+      (.defineClass cl name bytecode '())))
 
 (defn get-class
   "Creates and loads a class file with the given name"
@@ -200,6 +194,3 @@
       (catch ClassFormatError cfe (do
                                     (println cfe)
                                     nil))))
-
-;(ns-unmap 'org.tomhume.so.Bytecode 'f1)
-;(ns-unmap 'org.tomhume.so.Bytecode 'f2)

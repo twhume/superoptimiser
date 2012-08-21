@@ -16,6 +16,7 @@
   (dec (- (.indexOf s ")") (.indexOf s "("))))
 
 ; The method below was adapted from code at https://github.com/flatland/clojail/blob/master/src/clojail/core.clj#L40
+; We don't actually use it, as we removed backwards branching mid-project
 
 (defn with-timeout
   "Take a name, function, and timeout. Run the function in a named ThreadGroup until the timeout."
@@ -38,6 +39,7 @@
          (finally (when tg (.stop tg)))))))
 
 ; Taken from http://stackoverflow.com/questions/2622750/why-does-clojure-hang-after-having-performed-my-calculations
+; A cheap means of doing our filtering by spreading the load across many threads
 (defn pfilter [pred coll]
   (map second
     (filter first
@@ -57,14 +59,13 @@
     (try
       (every? #(% class) tests)
     (catch ArithmeticException e
-      ; ignore these. We get so many they don't help us.
+      ; ignore these. We get so many they don't help us, and they're all divide-by-zeros
       false)
     (catch Exception e
       (error "Exception" e cmap)
       false)
     (catch VerifyError e
       (error "VerifyError" e cmap)
-	  ; ignore VerifyErrors
       false)
     (catch Error e
       (error "Error" e  cmap)

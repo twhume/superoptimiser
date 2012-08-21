@@ -23,14 +23,14 @@
               :dup2_x1 {:opcode 93 :opstack-needs 3 :opstack-effect 2}
               :dup2_x2 {:opcode 94 :opstack-needs 4 :opstack-effect 2}
               
-              
+              ; NOP is by definition, useless
 ;             :nop {:opcode 0 :opstack-needs 0 :opstack-effect 0}
               :pop {:opcode 87 :opstack-needs 1 :opstack-effect -1}
               :pop2 {:opcode 88 :opstack-needs 2 :opstack-effect -2}
               :swap {:opcode 95 :opstack-needs 2 :opstack-effect 0}
 
-              ; integer transformation - commented out as we aren't using other types of variables
-              
+              ; Integer transformation - commented out as we aren't using other types of variables
+              ; This might mean we miss the change to do some weird things with casts...
 ;              :i2b {:opcode 145 :opstack-needs 1 :opstack-effect 0}
 ;              :i2c {:opcode 146 :opstack-needs 1 :opstack-effect 0}
 ;              :i2d {:opcode 135 :opstack-needs 1 :opstack-effect 0}
@@ -50,7 +50,7 @@
               :idiv {:opcode 108 :opstack-needs 2 :opstack-effect -1}
               
               ; branching
- ; In programs of the size              
+              ; "GOTO considered harmful" - in programs of the size we're using, it's not worth it          
 ;              :goto  {:opcode 167 :args [:branch-dest] :opstack-needs 0 :opstack-effect 0 :jump true}
               :if_icmpeq  {:opcode 159 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
               :if_icmpne  {:opcode 160 :args [:branch-dest] :opstack-needs 2 :opstack-effect -2 :jump true :cjump true}
@@ -67,9 +67,9 @@
               :ifle {:opcode 158 :args [:branch-dest] :opstack-needs 1 :opstack-effect -1 :jump true :cjump true}
 
               :iinc {:opcode 132 :args [:local-var, :s-byte] :opstack-needs 0 :opstack-effect 0}
+
+              ; We don't need iload in short programs when we have the shorthand iload_n opcodes
 ;              :iload {:opcode 21 :args [:local-var] :opstack-needs 0 :opstack-effect 1}
-              
-              ; Commented out as these are just shortcuts for iload
               
               :iload_0 {:opcode 26 :opstack-needs 0 :opstack-effect 1}
               :iload_1 {:opcode 27 :opstack-needs 0 :opstack-effect 1}
@@ -82,6 +82,8 @@
               :ireturn {:opcode 172 :opstack-needs 1 :opstack-effect 0}
               :ishl {:opcode 120 :opstack-needs 2 :opstack-effect -1}
               :ishr {:opcode 122 :opstack-needs 2 :opstack-effect -1}
+              
+              ; We don't need iload in short programs when we have the shorthand istore_n opcodes
 ;              :istore {:opcode 54 :args [:local-var] :opstack-needs 1 :opstack-effect -1}
                              
               :istore_0 {:opcode 59 :opstack-needs 1 :opstack-effect -1}
@@ -90,7 +92,4 @@
               :istore_3 {:opcode 62 :opstack-needs 1 :opstack-effect -1}
               :isub {:opcode 100 :opstack-needs 2 :opstack-effect -1}
               :iushr {:opcode 124 :opstack-needs 2 :opstack-effect -1}
-              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}}
-
-					  
-  )
+              :ixor {:opcode 130 :opstack-needs 2 :opstack-effect -1}})

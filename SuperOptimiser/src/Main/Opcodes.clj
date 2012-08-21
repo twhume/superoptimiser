@@ -10,7 +10,6 @@
 (use '[Filters.ReturnFilter :only (finishes-ireturn? no-ireturn?)])
 (use '[Filters.StackHeightFilter :only (branches-respect-stack-height?)])
 
-
 ; A list of opcodes which store into a variable. We count these so that
 ; we can derive a ceiling for the possible number of local variables.
 (def storage-opcodes '[:istore :istore_0 :istore_1 :istore_2 :istore_3])
@@ -72,12 +71,16 @@
     (contains-no-redundant-pairs? s)
 ))
 
+; This version of the get-children method can be used to enforce that every code sequence starts
+; by loading its argument. This is a shortcut; most of them *seem* to do this...
 (defn get-children-new [n s] 
   (if (empty? s) '([(:iload_0)])
     (if (is-fertile? n s) (map #(conj s (list %)) (keys opcodes)))))
 
 (defn get-children [n s] (if (or (empty? s) (is-fertile? n s)) (map #(conj s (list %)) (keys opcodes))))
 
+; This version of opcode-sequence can be used to enforce the idea that every code sequence ends
+; with an IRETURN and starts with an ILOAD_0. It's a shortcut designed to cut down the search space.
 (defn opcode-sequence-new
   "Return a sequence of potentially valid opcode sequences N opcodes in length"
   [max-depth num-args]
@@ -168,5 +171,3 @@
      (filter branches-respect-stack-height?
            (mapcat identity
                    (map (partial expand-opcodes m) (opcode-sequence-new n m))))))
-
-
