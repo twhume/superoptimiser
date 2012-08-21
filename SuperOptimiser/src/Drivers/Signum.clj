@@ -45,8 +45,6 @@
            (println (equivalent? (first remainder)) (first remainder))
            (recur (rest remainder))))))
    
-   
-   
     (defn run-slice
       "Superoptimises a small slice of the overall search space"
       [num-nodes cur-node]

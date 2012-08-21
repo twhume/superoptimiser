@@ -22,7 +22,6 @@
                        (fn zero-untouched? [i]  (= 0 (invoke-method i method-name 0)))
                        ]]
   
-  
 (defn -main []
   (time
     (dorun

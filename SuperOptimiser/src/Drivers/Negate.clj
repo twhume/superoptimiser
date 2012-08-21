@@ -4,7 +4,7 @@
 
 ; Superoptimises a function which negates its argument
 ;
-; An optimal sequence for this would be
+; An optimal hand-coded sequence for this would be
 ; ILOAD_0 INEG IRETURN
 
 (let [class-name "Negate"
