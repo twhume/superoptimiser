@@ -9,7 +9,7 @@
 ;   opstack-effect The effect this opcode has on the operand stack (number of entries added, negative is entries are removed)
 
 (def opcodes {
-              :bipush {:opcode 16 :args [:byte] :opstack-needs 0 :opstack-effect 1}
+              :bipush {:opcode 16 :args [:s-byte] :opstack-needs 0 :opstack-effect 1}
               
               ; operand stack-related
               
