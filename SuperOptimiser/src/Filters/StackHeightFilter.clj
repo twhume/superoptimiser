@@ -24,8 +24,6 @@
           (if (empty? remainder) true
               (if (not (= (nth stack-heights (inc src)) (nth stack-heights dest))) false
                 (recur (rest remainder)))))))))
-  ; work out the stack height at each instruction
-  ; go through the list of jumps
 
 (is (= false (branches-respect-stack-height? '{:jumps {2 4} :code ((:iload_0) (:iload_0) (:ifle 2) (:istore_0) (:ireturn))})))
 (is (= false (branches-respect-stack-height? '{:jumps {2 4} :code ((:iload_0) (:dup) (:if_icmpne 2) (:iconst_m1) (:ireturn))})))

@@ -8,7 +8,6 @@
 ; If a sequence of operations has not changed the state of a frame, that sequence is by definition redundant.
 ; If a candidate sequence of opcodes contains any redundant operations, it is by definition not optimal.
 
-
 (defn init-state
   "Initialises a map for the state of the code sequence, with the number of arguments passed in"
   [num-args]
@@ -30,7 +29,6 @@
          :vars (apply hash-map (let [i (atom (dec (:max-var state-map)))]
                                  (interleave (keys (:vars state-map)) (repeatedly #(vector :var (swap! i inc))))))
          :max-var (+ 4 (:max-var state-map))))
-
 
 (defn constant?
   "Is this entry from the stack a constant?"
@@ -109,8 +107,6 @@
 (is (=
       '{:stack ([:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
       (add-state (init-state 1) :bipush)))
-
-
 
 (is (= '{:stack ([:constant 0] [:constant 0]), :max-var 1, :max-const 1, :max-calc 0, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
        (add-state (add-state (init-state 1) :bipush) :dup)))
@@ -210,8 +206,6 @@
       (add-state
         '{:stack ([:calc 0]), :max-var 1, :max-const 1, :max-calc 1, :vars {0 :arg-0, 1 nil, 2 nil, 3 nil}}
         :ineg)))
-
-
 
 (defn state-recurred?
   "Has cur-state ever occurred before, in the list of states supplied as past-states?"

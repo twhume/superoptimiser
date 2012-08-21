@@ -175,7 +175,6 @@
                 (println "Unhandled operation" op)
                 false)))))
 
-
 (is (= true (retains-influence? 1 '((:iload_0) (:ireturn)))))
 (is (= false (retains-influence? 1 '((:bipush) (:ireturn)))))
 (is (= false (retains-influence? 1 '((:iload_0) (:bipush) (:ireturn)))))
